@@ -1,0 +1,61 @@
+/**************************************************************************/
+/** Colors
+/**************************************************************************/
+
+:root {
+
+    --nav-color: #636363;
+
+
+
+    --green-background: #238f23;
+    --green-font: #edffed;
+    --green-background-hover: #008000;
+    --green-font-hover: #fff;
+
+
+}
+
+
+
+/**************************************************************************/
+/** App Tabs/Navbar
+/**************************************************************************/
+
+.app-nav-bar {
+    background-color: var(--nav-color);
+    height: 36px;
+    line-height: 36px;
+}
+
+.app-tab-container {
+    float: right;
+    height: 100%;
+    padding: 0 20px;
+}
+
+.app-tab-container > div {
+    float: left;
+    min-width: 125px;
+    color: white;
+    text-align: center;
+    height: 100%;
+    cursor: pointer;
+}
+
+.app-tab-container > div:hover {
+    background-color: #50535f;
+}
+
+.app-tab-container > div.active,
+.app-tab-container > div.active:hover {
+    background-color: #50535f;
+}
+
+
+
+
+.app-header-menu.noselect.warning {
+    position: absolute;
+}
+

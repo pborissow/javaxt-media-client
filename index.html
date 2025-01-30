@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Loading...</title>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0" />
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+
+<!-- Add 3rd party libs -->
+<script src="lib/*.js"></script>
+<link href="lib/*.css" rel="stylesheet" />
+
+
+<!-- Add specific js and css files to override ordering of the wildcard includes -->
+<link href="lib/javaxt/javaxt-dark-theme.css" rel="stylesheet" />
+
+
+
+<!-- Add this application -->
+<!--<link href="style/main.css" rel="stylesheet" />-->
+<script src="app/*.js"></script>
+<link href="app/*.css" rel="stylesheet" />
+
+
+</head>
+<body>
+<script>
+    window.onload = function() {
+        javaxt.dhtml.utils.updateDOM();
+        new javaxt.media.webapp.Application(document.body);
+    };
+</script>
+</body>
+</html>
