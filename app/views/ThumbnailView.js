@@ -361,7 +361,7 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
     var createThumbnail = function(item, div){
         var thumbnail = createElement("div", div, "thumbnail");
         if (item.isFolder){
-            createElement("i", thumbnail, "fas fa-folder");
+            createElement("div", thumbnail, "folder-icon");
             createElement("div", thumbnail).innerText = item.name;
         }
         else{
@@ -441,7 +441,7 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
         noresults = createElement("div", parent, "no-search-results middle noselect");
         addShowHide(noresults);
         noresults.hide();
-        createElement("i", noresults, "fas fa-search");
+        createElement("div", noresults, "icon");
         createElement("div", noresults).innerText = "No images found";
     };
 

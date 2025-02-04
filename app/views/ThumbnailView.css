@@ -1,35 +1,7 @@
 
 /**************************************************************************/
-/** DataGrid
-/**************************************************************************/
-
-.javaxt-thumbnail-view .table-header {
-    display: none;
-}
-
-.javaxt-thumbnail-view .table-row,
-.javaxt-thumbnail-view .table-row-selected {
-    background-color: initial;
-    border-bottom: 0px none;
-}
-
-.javaxt-thumbnail-view .table-col {
-    height:360px;
-    /*line-height: 200px;*/
-}
-
-.javaxt-thumbnail-view .table-col > div > div {
-    text-align: center;
-}
-
-/**************************************************************************/
 /** Thumbnail Container
 /**************************************************************************/
-
-.javaxt-thumbnail-view .thumbnail-container {
-    height: 100%;
-    display: inline-block;
-}
 
 .javaxt-thumbnail-view .thumbnail {
     width: 320px;
@@ -46,14 +18,20 @@
 /** Folder Icon
 /**************************************************************************/
 
-.javaxt-thumbnail-view .thumbnail .fas.fa-folder {
-    font-size: 201px;
+.javaxt-thumbnail-view .thumbnail .folder-icon {
     color: #45413a;
     text-shadow: -6px 3px 6px #000;
     transition: 0.4s;
 }
 
-.javaxt-thumbnail-view .thumbnail .fas.fa-folder:hover {
+.javaxt-thumbnail-view .thumbnail .folder-icon:after {
+    font-family: "Font Awesome 5 Free";
+    content: "\f07b"; /* fa-folder */
+    font-weight: 900; /* fas (solid) */
+    font-size: 201px;
+}
+
+.javaxt-thumbnail-view .thumbnail .folder-icon:hover {
     color: #534631;
     text-shadow: -9px 7px 17px #000;
 }
@@ -81,7 +59,7 @@
 .javaxt-thumbnail-view .thumbnail.not-available:after {
     font-family: "Font Awesome 5 Free";
     font-size: 100px;
-    content: "\f070"; /* fas fa-chevron-down */
+    content: "\f070"; /* far fa-eye-slash */
     z-index: 1;
     position: absolute;
     right: calc(50% - 60px);
@@ -89,11 +67,9 @@
 }
 
 
-
 /**************************************************************************/
 /** Missing Search Results
 /**************************************************************************/
-
 
 .javaxt-thumbnail-view .no-search-results {
     text-align: center;
@@ -101,13 +77,16 @@
     color: #777;
 }
 
-
-.javaxt-thumbnail-view .no-search-results .fas {
-    font-size: 114px;
+.javaxt-thumbnail-view .no-search-results .icon {
     color: #e9e9e9;
-
     color: #3a3e45;
     text-shadow: -6px 3px 6px #000;
+    padding: 20px 0;
+}
 
-    padding:20px 0;
+.javaxt-thumbnail-view .no-search-results .icon:after {
+    font-family: "Font Awesome 5 Free";
+    content: "\f002"; /* fa-search */
+    font-weight: 900; /* fas (solid) */
+    font-size: 160px;
 }
