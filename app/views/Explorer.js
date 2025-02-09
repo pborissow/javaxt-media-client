@@ -12,25 +12,33 @@ if(!javaxt.media.webapp) javaxt.media.webapp={};
  ******************************************************************************/
 
 javaxt.media.webapp.Explorer = function(parent, config) {
-
+    this.className = "javaxt.media.webapp.Explorer"; //used by popstateListener
 
     var me = this;
     var defaultConfig = {
 
+      /** Parent for the pop-up viewer */
+        viewport: parent,
+
         style: {
-            
+
         }
     };
 
-    var title;
-    var button = {};
-    var waitmask;
-    var thumbnailView;
 
-    var viewport; //for popup windows
-    var viewer;
+  //Components
+    var title, toggleSwitch, button = {}; //internal components
+    var waitmask, thumbnailView, viewer; //external components
 
-    var filter = {};
+  //Current filter
+    var filter = {
+        path: []
+    };
+
+  //History-related variables
+    var ignorePopstate = false;
+    var navHistory = [];
+    var navPosition = -1;
 
 
   //**************************************************************************
@@ -38,22 +46,24 @@ javaxt.media.webapp.Explorer = function(parent, config) {
   //**************************************************************************
     var init = function(){
 
-
         if (!config) config = {};
         merge(config, defaultConfig);
         waitmask = config.waitmask;
-        viewport = parent;
 
 
       //Create main table
         var table = createTable(parent);
-        table.className = "javaxt-media-explorer";
+        table.className = "javaxt-media-explorer noselect";
 
 
       //Create panels
         createHeader(table.addRow().addColumn());
         createBody(table.addRow().addColumn({height: "100%" }));
         createFooter(table.addRow().addColumn());
+
+
+      //Watch for forward and back events via a 'popstate' listener
+        enablePopstateListener();
 
 
         me.el = table;
@@ -65,7 +75,8 @@ javaxt.media.webapp.Explorer = function(parent, config) {
   //** clear
   //**************************************************************************
     this.clear = function(){
-
+        navHistory = [];
+        navPosition = -1;
     };
 
 
@@ -73,17 +84,111 @@ javaxt.media.webapp.Explorer = function(parent, config) {
   //** update
   //**************************************************************************
     this.update = function(){
+        me.clear();
+
         thumbnailView.update(filter);
+
+        navHistory.push({
+            view: "thumbnails",
+            filter: me.getFilter(),
+            title: document.title
+        });
+        navPosition = 0;
     };
 
 
   //**************************************************************************
-  //** setViewport
+  //** enable
   //**************************************************************************
-  /** Used to set the parent for the viewer. This should only be called once.
+  /** Called whenever this component is brought into view via the main app
    */
-    this.setViewport = function(el){
-        viewport = el;
+    this.enable = function(){
+        ignorePopstate = false;
+
+
+        /* The back button in this component's toolbar calls history.back()
+         * in order to go "up" a folder. We do this because we want to allow
+         * users to use the forward/back buttons in the browser to navigate
+         * through folders. Problem is that if this component is used within
+         * another component that uses a popstate listener (e.g. Horizon app),
+         * you can run into a situation where a user clicks on the back button
+         * and the app does something completly unexpected (e.g. switch tabs
+         * in the Horizon app). As a workaround, we're going to push some
+         * history into the browser and navigate to the current folder.
+         */
+
+
+
+      //Count number of pages we need to traverse to get to the root folder
+        var stepsBack = 0;
+        if (navPosition>0){
+            for (var i=navPosition; i>=0; i--){
+                if (navHistory[i].filter.path.length===0){
+                    break;
+                }
+                stepsBack++;
+            }
+        }
+
+
+
+        if (stepsBack>0){
+
+          //Disable popstate listener
+            ignorePopstate = true;
+
+
+          //Add new history to the stack going back to the root folder
+            for (var i=navPosition-stepsBack; i<navPosition+1; i++){
+                addHistory({
+                    title: navHistory[i].title,
+                    filter: navHistory[i].filter
+                });
+            }
+
+
+          //Move browser forward
+            history.forward(stepsBack);
+
+
+          //Remove anything past the current page in the navHistory
+            if (navPosition+1<navHistory.length){
+                navHistory.splice(navPosition+1);
+            }
+
+
+          //Re-enable the popstate listener
+            setTimeout(()=>{ignorePopstate = false;}, 500);
+        }
+    };
+
+
+  //**************************************************************************
+  //** disable
+  //**************************************************************************
+  /** Called whenever this component is taken out of view via the main app
+   */
+    this.disable = function(){
+        ignorePopstate = true;
+
+        //TODO: stop slideshow
+
+    };
+
+
+  //**************************************************************************
+  //** getFilter
+  //**************************************************************************
+    this.getFilter = function(){
+        return JSON.parse(JSON.stringify(filter));
+    };
+
+
+  //**************************************************************************
+  //** getTitle
+  //**************************************************************************
+    this.getTitle = function(){
+        return title.innerText;
     };
 
 
@@ -102,9 +207,14 @@ javaxt.media.webapp.Explorer = function(parent, config) {
   //**************************************************************************
     var createTitle = function(parent){
         title = createElement("div", parent, "title");
-        title.update = function(obj){
-            if (!obj) obj = "Home";
-            title.innerText = obj;
+        title.update = function(){
+            if (!filter.path || filter.path.length===0){
+                title.innerText = "Home";
+            }
+            else{
+                title.innerText = filter.path[filter.path.length-1];
+            }
+            document.title = title.innerText;
         };
         title.clear = function(){
             title.update();
@@ -128,47 +238,52 @@ javaxt.media.webapp.Explorer = function(parent, config) {
 
       //Back button
         button["back"] = createButton(toolbar, {
-            label: "Back",
-            icon: "fas fa-arrow-left"
+            label: "Up",
+            icon: "back"
         });
         button["back"].onClick = function(){
-
-            var showAll = toggleSwitch.getValue();
-            if (showAll){
-                toggleSwitch.setValue(false, true);
-                delete filter.recursive;
-            }
+            if (!filter.path || filter.path.length===0) return;
 
 
-            if (!filter.path || filter.path.length===0){
-                title.clear();
-                if (showAll) thumbnailView.update(filter);
+          //Get current path
+            var orgPath = JSON.parse(JSON.stringify(filter.path));
+
+          //Move back
+            moveBack();
+
+          //If we remove the last directory from the orgPath and compare it to
+          //the current path, use the browser to go back.
+            orgPath.pop();
+            if (isEqual(orgPath, filter.path)){
+                ignorePopstate = true;
+                history.back();
+                setTimeout(()=>{ignorePopstate = false;}, 500);
             }
-            else{
-                filter.path.pop();
-                title.update(filter.path[filter.path.length-1]);
-                thumbnailView.update(filter);
+            else{ //not tested...
+                //updateHistory();
             }
+
         };
 
 
-
-      //Toggle button used to show/hide inactive users
-        var toggle = createElement('div', toolbar, {
-            float: "right",
-            padding: "3px 5px"
+        button["edit"] = createButton(toolbar, {
+            label: "Edit",
+            icon: "edit"
         });
 
-        var table = createTable(toggle);
+
+      //Toggle button used to show/hide inactive users
+        var table = createTable(createElement('div', toolbar, {
+            float: "right",
+            padding: "3px 5px"
+        }));
         var row = table.addRow();
         var label = row.addColumn("toolbar-button-label");
         label.innerText = "Show All"; //Hide folders
         label.style.padding = "0 7px 0 0";
 
 
-        var cell = row.addColumn();
-
-        var toggleSwitch = new javaxt.dhtml.Switch(cell, {
+        toggleSwitch = new javaxt.dhtml.Switch(row.addColumn(), {
             style: config.style.switch,
             value: false
         });
@@ -182,7 +297,6 @@ javaxt.media.webapp.Explorer = function(parent, config) {
             thumbnailView.update(filter);
         };
 
-
     };
 
 
@@ -192,7 +306,9 @@ javaxt.media.webapp.Explorer = function(parent, config) {
     var createBody = function(parent){
 
 
-        thumbnailView = new javaxt.media.webapp.ThumbnailView(parent, config);
+        thumbnailView = new javaxt.media.webapp.ThumbnailView(parent, {
+            style: javaxt.dhtml.style.default
+        });
         thumbnailView.onClick = function(item){
 
             if (item.isFolder){
@@ -202,25 +318,39 @@ javaxt.media.webapp.Explorer = function(parent, config) {
                 filter.path.push(item.name);
                 thumbnailView.update(filter);
 
-              //Update title
-                title.update(item.name);
+              //Update history
+                addHistory();
+
+              //Update title (do after setting history)
+                title.update();
 
             }
             else{
 
               //Render media viewer
-                if (!viewer) viewer = new javaxt.media.webapp.ItemView(viewport, config);
+                if (!viewer) viewer = new javaxt.media.webapp.ItemView(config.viewport, {
+                    style: javaxt.dhtml.style.default
+                });
                 viewer.update(item, thumbnailView.getPage(), filter);
                 viewer.show();
-                var o = getHighestElements(); //thumbnailView.el
+                var o = getHighestElements();
                 if (!o.contains(viewer.el)){
                     viewer.el.style.zIndex = o.zIndex+1;
                 }
+
+              //Update history
+                addHistory();
             }
+
+            navHistory.push({
+                view: "thumbnails",
+                filter: me.getFilter(),
+                title: document.title
+            });
+            navPosition++;
 
         };
     };
-
 
 
   //**************************************************************************
@@ -230,6 +360,194 @@ javaxt.media.webapp.Explorer = function(parent, config) {
 
     };
 
+
+  //**************************************************************************
+  //** moveBack
+  //**************************************************************************
+  /** Used to move "up" one level. This method is used by the back button and
+   *  the popstate listener.
+   */
+    var moveBack = function(){
+
+        var showAll = toggleSwitch.getValue();
+        if (showAll){
+            toggleSwitch.setValue(false, true);
+            delete filter.recursive;
+        }
+
+
+        if (!filter.path || filter.path.length===0){
+            title.clear();
+            if (showAll) thumbnailView.update(filter);
+        }
+        else{
+            filter.path.pop();
+            title.update();
+            thumbnailView.update(filter);
+        }
+
+
+        navPosition--;
+        navHistory[navPosition] = {
+            view: "thumbnails",
+            filter: me.getFilter(),
+            title: document.title
+        };
+    };
+
+
+  //**************************************************************************
+  //** addHistory
+  //**************************************************************************
+  /** Used to add a "page" to the browser history
+   */
+    var addHistory = function(params){
+        updateState(params, false);
+    };
+
+
+  //**************************************************************************
+  //** updateHistory
+  //**************************************************************************
+  /** Used to update browser history for the current "page"
+   */
+    var updateHistory = function(params){
+        updateState(params, true);
+    };
+
+
+  //**************************************************************************
+  //** updateState
+  //**************************************************************************
+  /** Used to update browser history
+   *  @param params JSON object with the following:
+   *  <ul>
+   *  <li>title - text to display in the browser's title</li>
+   *  <li>url - custom url</li>
+   *  </ul>
+   */
+    var updateState = function(params, replace){
+        if (!params) params = {};
+
+      //Set title
+        var title = params.title;
+        if (!title) title = me.getTitle();
+
+      //Set filter
+        if (!params.filter) params.filter = JSON.parse(JSON.stringify(filter));
+
+      //Set url
+        var url = "";
+        if (params.filter.path){
+            //url = params.filter.path.join("/"); //don't use until api is updated
+        }
+
+      //Get or create state
+        var state = window.history.state;
+        if (!state) state = {};
+        state[me.className] = params;
+
+      //Push or replace state
+        if (replace){
+            document.title = title;
+            history.replaceState(state, title, url);
+        }
+        else{
+            history.pushState(state, title, url);
+            document.title = title;
+        }
+    };
+
+
+  //**************************************************************************
+  //** enablePopstateListener
+  //**************************************************************************
+    var enablePopstateListener = function(){
+        disablePopstateListener();
+        window.addEventListener('popstate', popstateListener);
+
+
+        var state = window.history.state;
+        if (!state) state = {};
+        if (state[me.className]){
+            var params = state[me.className];
+            if (params.filter){
+                if (params.filter.path){
+                    filter.path = params.filter.path;
+                    title.update();
+                }
+            }
+        }
+        else{
+
+          //Set initial history. This is critical for the popstate listener
+            state[me.className] = {
+                filter: me.getFilter()
+            };
+            history.replaceState(state, document.title, '');
+
+        }
+    };
+
+
+  //**************************************************************************
+  //** disablePopstateListener
+  //**************************************************************************
+    var disablePopstateListener = function(){
+        window.removeEventListener('popstate', popstateListener);
+    };
+
+
+  //**************************************************************************
+  //** popstateListener
+  //**************************************************************************
+  /** Used to processes forward and back events from the browser
+   */
+    var popstateListener = function(e) {
+        if (ignorePopstate) return;
+
+
+      //Special case for when the popup viewer is open
+        if (viewer){
+            if (viewer.isVisible()){
+                viewer.hide();
+
+                //TODO: remove/reset current state. Otherwise we're left
+                //with an extra page in the forward history.
+
+                return;
+            }
+        }
+
+
+
+        if (e.state[me.className]){ //event emanated from this class
+
+          //TODO: Check if the next "page" should open the viewer.
+          //Currently we have an extra page in the forward history.
+
+
+          //Update thumbnail view and title
+            var params = e.state[me.className];
+            if (params.filter){
+                filter.path = params.filter.path;
+                thumbnailView.update(filter);
+                title.update();
+            }
+        }
+
+    };
+
+
+  //**************************************************************************
+  //** isEqual
+  //**************************************************************************
+  /** Returns true if two arrays are equal
+   */
+    var isEqual = function(a, b){
+        if ((!a && b) || (!b && b)) return false;
+        return a.every((val, idx) => val === b[idx]);
+    };
 
 
   //**************************************************************************
