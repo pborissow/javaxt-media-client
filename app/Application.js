@@ -18,7 +18,12 @@ javaxt.media.webapp.Application = function(parent, config) {
     var defaultConfig = {
 
         name: "JavaXT Media Server",
-        standAlone: true
+
+        /** If true, will add an admin tab */
+        standAlone: true,
+
+
+        style: javaxt.dhtml.style.default
     };
 
 
@@ -44,8 +49,12 @@ javaxt.media.webapp.Application = function(parent, config) {
 
 
 
-      //Instantiate app container with horizontal tabs
-        app = new javaxt.express.app.Horizon(mainDiv, config);
+      //Instantiate main app (component with horizontal tabs)
+        app = new javaxt.express.app.Horizon(mainDiv, {
+            name: config.name,
+            style: config.style,
+            useBrowserHistory: true
+        });
 
 
 
@@ -68,7 +77,7 @@ javaxt.media.webapp.Application = function(parent, config) {
         get("whoami", {
             success: function(username){
 
-                get("user/current", {
+                get("user", {
                     success: function(user){
                         updateUser(JSON.parse(user));
                     },
@@ -101,18 +110,26 @@ javaxt.media.webapp.Application = function(parent, config) {
     var updateUser = function(user){
 
 
-      //
+      //Define tabs to render
         var tabs = [];
-        tabs.push({name: "Home", cls: javaxt.media.webapp.Explorer});
+        tabs.push({
+            name: "Home",
+            class: javaxt.media.webapp.Explorer,
+            config: {
+                viewport: me.el,
+                style: config.style
+            }
+        });
+
         if (config.standAlone===true){
             if (user && user.accessLevel===5){
-                tabs.push({name: "Admin", cls: javaxt.media.webapp.AdminPanel});
+                tabs.push({name: "Admin", class: javaxt.media.webapp.AdminPanel});
             }
         }
 
 
 
-      //Hide tab bar as needed
+      //Show/hide tabbar
         var tabContainer = app.el.getElementsByClassName("app-tab-container")[0];
         tabContainer.style.display = tabs.length<2 ? "none" : "block";
 
@@ -124,19 +141,26 @@ javaxt.media.webapp.Application = function(parent, config) {
 
 
       //Watch for tab change events
+        app.beforeTabChange = function(currTab){
+            if (currTab.panel.disable) currTab.panel.disable();
+        };
+
         app.onTabChange = function(currTab){
 
-
-          //
+          //Update document title
             if (currTab.panel instanceof javaxt.media.webapp.Explorer){
                 var explorer = currTab.panel;
-                explorer.setViewport(me.el);
+                document.title = explorer.getTitle();
+            }
+            else{
+                var label = currTab.name;
+                document.title = config.name + " - " + label;
             }
 
 
-            if (currTab.panel.setActive){
-                currTab.panel.setActive();
-            }
+          //Enable tab
+            if (currTab.panel.enable) currTab.panel.enable();
+
         };
 
     };
