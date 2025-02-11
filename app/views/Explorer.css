@@ -1,6 +1,47 @@
+.javaxt-media-explorer {
+    background-color: #000;
 
-.javaxt-media-explorer .title {
-    font-size: 60px;
-    margin: 0 10px;
-    line-height: 60px;
+
+    .title {
+        font-size: 50px;
+        margin: 0 10px;
+        line-height: 55px;
+        height: 60px;
+    }
+
+
+  /**************************************************************************/
+  /** Toolbar Items
+  /**************************************************************************/
+
+    .panel-toolbar {
+        background-color: inherit;
+        border-top: 2px solid #20232b;
+        border-bottom: 0 none;
+    }
+
+
+    .panel-toolbar .toolbar-button {
+        background-color: inherit;
+        border-color: rgba(0,0,0,0);
+        width: 100%; /* reset width */
+        margin-top: -8px;
+    }
+
+
+    .panel-toolbar .back:after,
+    .panel-toolbar .edit:after {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; /* fas (solid) */
+        font-size: 14px;
+    }
+
+    .panel-toolbar .back:after {
+        content: "\f062"; /* fa-arrow-up */
+    }
+
+    .panel-toolbar .edit:after {
+        content: "\f044"; /* fa-arrow-up */
+    }
+
 }

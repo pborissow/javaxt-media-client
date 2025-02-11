@@ -1,184 +1,185 @@
-
 .javaxt-media-view {
+
     background-color: #000;
-}
-
-
-
-/**************************************************************************/
-/** Close Button
-/**************************************************************************/
-
-.javaxt-media-view .close-button {
-    width:  52px;
-    height: 52px;
-    text-align: center;
-    cursor: pointer;
-    background-color: rgba(0,0,0,0.6);
-    border-radius: 50%;
-    margin: 10px;
-}
-
-.javaxt-media-view .close-button:hover{
-    background-color: rgba(0,0,0,0.8);
-}
-
-.javaxt-media-view .close-button:after {
-    content: '\2715'; /* &#x2715; */
-    line-height: 52px;
-    font-size: 30px;
-}
-
-
-/**************************************************************************/
-/** Menu Icon
-/**************************************************************************/
-/** The following classes are used to create a menu icon in the header in
- *  the upper left corner.
- */
-
-.menu-icon {
-    display: inline-block;
-    cursor: pointer;
-    padding: 0 15px;
-}
-
-.menu-bar1, .menu-bar2, .menu-bar3 {
-    width: 35px;
-    height: 5px;
-    background-color: #dadada;
-    margin: 6px 0;
-    transition: 0.6s;
-    box-shadow: 3px 4px 0px 0px rgba(0, 0, 0, 0.1);
-}
-
-.menu-bar2 {
-    transition: 0.2s;
-}
-
-.menu-icon:hover .menu-bar1, .menu-icon:hover .menu-bar2, .menu-icon:hover .menu-bar3 {
-    background-color: #fff;
-}
-
-
-.menu-icon-change .menu-bar1 {
-    -webkit-transform: rotate(-45deg) translate(-9px, 7px);
-    transform: rotate(-45deg) translate(-9px, 7px);
-}
-
-.menu-icon-change .menu-bar2 {opacity: 0;}
-
-.menu-icon-change .menu-bar3 {
-    -webkit-transform: rotate(45deg) translate(-9px, -7x);
-    transform: rotate(45deg) translate(-9px, -7px);
-    box-shadow: 3px 0px 0px 0px rgba(0, 0, 0, 0.1);
-}
-
-
-/* The following 2 classes force the "X" into a ">" */
-.menu-icon-change .menu-bar1 {
-    -webkit-transform: rotate(-45deg) translate(-9px, 17px);
-    transform: rotate(-45deg) translate(-9px, 17px);
-    width: 22px;
-}
-.menu-icon-change .menu-bar3 {
-    -webkit-transform: rotate(45deg) translate(-9px, -16px);
-    transform: rotate(45deg) translate(-9px, -16px);
-    box-shadow: none;
-    width: 22px;
-}
 
 
 
 
-/**************************************************************************/
-/** Carousel Controls
-/**************************************************************************/
+  /**************************************************************************/
+  /** Close Button
+  /**************************************************************************/
 
-.javaxt-media-view .move-left,
-.javaxt-media-view .move-right {
-    width: 60px;
-    height: 60px;
-    text-align: center;
-    cursor: pointer;
-    background-color: rgba(0,0,0,0.6);
-    border-radius: 50%;
-    margin: 10px;
-    margin-top: -30px; /* half height */
-    position: relative;
-}
+    .close-button {
+        width:  52px;
+        height: 52px;
+        text-align: center;
+        cursor: pointer;
+        background-color: rgba(0,0,0,0.6);
+        border-radius: 50%;
+        margin: 10px;
+    }
 
+    .close-button:hover{
+        background-color: rgba(0,0,0,0.8);
+    }
 
-
-.javaxt-media-view .move-left:before,
-.javaxt-media-view .move-left:after,
-.javaxt-media-view .move-right:before,
-.javaxt-media-view .move-right:after{
-    content: '';
-    width: 35px;
-    height: 5px;
-    background-color: #dadada;
-    display: inline-block;
-    border-radius: 2px;
-    position: absolute;
-}
-
-.javaxt-media-view .move-left:before {
-    -webkit-transform: rotate(45deg) translate(-9px, 17px);
-    transform: rotate(45deg) translate(-9px, 17px);
-    top: 34px;
-    left: 26px;
-}
-
-.javaxt-media-view .move-left:after {
-    -webkit-transform: rotate(-45deg) translate(-12px, -18px);
-    transform: rotate(-45deg) translate(-12px, -18px);
-    top: 21px;
-}
+    .close-button:after {
+        content: '\2715'; /* &#x2715; */
+        line-height: 52px;
+        font-size: 30px;
+    }
 
 
-.javaxt-media-view .move-right:before {
-    -webkit-transform: rotate(-45deg) translate(-9px, 17px);
-    transform: rotate(-45deg) translate(-9px, 17px);
-    top: 20px;
-    right: 12px;
-}
+  /**************************************************************************/
+  /** Menu Icon
+  /**************************************************************************/
+  /** The following classes are used to create a menu icon in the header in
+   *  the upper left corner.
+   */
+    .menu-icon {
+        display: inline-block;
+        cursor: pointer;
+        padding: 0 15px;
+    }
 
-.javaxt-media-view .move-right:after {
-    -webkit-transform: rotate(45deg) translate(-12px, -18px);
-    transform: rotate(45deg) translate(-12px, -18px);
-    top: 37px;
-    right: 12px;
-}
+    .menu-bar1, .menu-bar2, .menu-bar3 {
+        width: 35px;
+        height: 5px;
+        background-color: #dadada;
+        margin: 6px 0;
+        transition: 0.6s;
+        box-shadow: 3px 4px 0px 0px rgba(0, 0, 0, 0.1);
+    }
+
+    .menu-bar2 {
+        transition: 0.2s;
+    }
+
+    .menu-icon:hover .menu-bar1, .menu-icon:hover .menu-bar2, .menu-icon:hover .menu-bar3 {
+        background-color: #fff;
+    }
+
+
+    .menu-icon-change .menu-bar1 {
+        -webkit-transform: rotate(-45deg) translate(-9px, 7px);
+        transform: rotate(-45deg) translate(-9px, 7px);
+    }
+
+    .menu-icon-change .menu-bar2 {opacity: 0;}
+
+    .menu-icon-change .menu-bar3 {
+        -webkit-transform: rotate(45deg) translate(-9px, -7x);
+        transform: rotate(45deg) translate(-9px, -7px);
+        box-shadow: 3px 0px 0px 0px rgba(0, 0, 0, 0.1);
+    }
+
+
+    /* The following 2 classes force the "X" into a ">" */
+    .menu-icon-change .menu-bar1 {
+        -webkit-transform: rotate(-45deg) translate(-9px, 17px);
+        transform: rotate(-45deg) translate(-9px, 17px);
+        width: 22px;
+    }
+    .menu-icon-change .menu-bar3 {
+        -webkit-transform: rotate(45deg) translate(-9px, -16px);
+        transform: rotate(45deg) translate(-9px, -16px);
+        box-shadow: none;
+        width: 22px;
+    }
 
 
 
-/**************************************************************************/
-/** Play Controls
-/**************************************************************************/
 
-.javaxt-media-view .footer {
-    text-align: center;
-    height: 30px;
-}
+  /**************************************************************************/
+  /** Carousel Controls
+  /**************************************************************************/
 
-.javaxt-media-view .footer > div {
-    display: inline-block;
-}
+    .move-left,
+    .move-right {
+        width: 60px;
+        height: 60px;
+        text-align: center;
+        cursor: pointer;
+        background-color: rgba(0,0,0,0.6);
+        border-radius: 50%;
+        margin: 10px;
+        margin-top: -30px; /* half height */
+        position: relative;
+    }
 
 
-.javaxt-media-view .back-button {
-    width: 0;
-    height: 0;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-right: 5px solid #272727;
-}
 
-.javaxt-media-view .next-button {
-    width: 0;
-    height: 0;
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-left: 5px solid #272727;
+    .move-left:before,
+    .move-left:after,
+    .move-right:before,
+    .move-right:after{
+        content: '';
+        width: 35px;
+        height: 5px;
+        background-color: #dadada;
+        display: inline-block;
+        border-radius: 2px;
+        position: absolute;
+    }
+
+    .move-left:before {
+        -webkit-transform: rotate(45deg) translate(-9px, 17px);
+        transform: rotate(45deg) translate(-9px, 17px);
+        top: 34px;
+        left: 26px;
+    }
+
+    .move-left:after {
+        -webkit-transform: rotate(-45deg) translate(-12px, -18px);
+        transform: rotate(-45deg) translate(-12px, -18px);
+        top: 21px;
+    }
+
+
+    .move-right:before {
+        -webkit-transform: rotate(-45deg) translate(-9px, 17px);
+        transform: rotate(-45deg) translate(-9px, 17px);
+        top: 20px;
+        right: 12px;
+    }
+
+    .move-right:after {
+        -webkit-transform: rotate(45deg) translate(-12px, -18px);
+        transform: rotate(45deg) translate(-12px, -18px);
+        top: 37px;
+        right: 12px;
+    }
+
+
+
+  /**************************************************************************/
+  /** Play Controls
+  /**************************************************************************/
+
+    .footer {
+        text-align: center;
+        height: 30px;
+    }
+
+    .footer > div {
+        display: inline-block;
+    }
+
+
+    .back-button {
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-right: 5px solid #272727;
+    }
+
+    .next-button {
+        width: 0;
+        height: 0;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+        border-left: 5px solid #272727;
+    }
+
 }
