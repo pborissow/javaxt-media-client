@@ -19,20 +19,24 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
     };
 
-    var carousel;
-    var footer;
+  //Components
+    var carousel, footer, button = {};
 
-
+  //Carousel-specific variables
     var retriever;
     var mediaItems = [];
     var currItem = 0;
     var numItems = -1;
 
+  //Current/visible item
+    var mediaItem = null;
+    var width, height;
+    var visibleDiv;
 
 
-    //**************************************************************************
-    //** Constructor
-    //**************************************************************************
+  //**************************************************************************
+  //** Constructor
+  //**************************************************************************
     var init = function () {
 
         if (!config) config = {};
@@ -73,6 +77,15 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         createFooter(table.addRow().addColumn());
 
 
+      //Watch for keyboard events
+        document.addEventListener("keydown", function(e){
+            if (!me.isVisible()) return;
+            if (e.keyCode==39) carousel.next();
+            else if (e.keyCode==37) carousel.back();
+        });
+
+
+      //Instantiate Retriever
         retriever = new javaxt.media.webapp.Retriever();
     };
 
@@ -88,6 +101,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             panel.div.innerHTML = "";
             panel.div.style.backgroundImage = "";
         });
+
+        mediaItem = null;
     };
 
 
@@ -203,7 +218,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
       //Create carousel
         carousel = new javaxt.dhtml.Carousel(div, {
             loop: true,
-            animate: true
+            animate: true,
+            slideOver: true
         });
 
         carousel.getVisiblePanel = function(){
@@ -219,6 +235,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         for (var i=0; i<2; i++){
             carousel.add(createElement("div", {
                 height: "100%",
+                position: "relative",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center center"
             }));
@@ -357,9 +374,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             display: "none"
         });
         img.panel = div;
+        visibleDiv = div;
 
         img.onload = function(){
             this.panel.style.backgroundImage = "url(\"" +  this.src + "\")";
+            width = this.width;
+            height = this.height;
             this.parentNode.removeChild(this);
         };
 
@@ -376,9 +396,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
         get("/MediaItem?id=" + item.id, {
             success: function(text){
-                var mediaItem = JSON.parse(text);
-                //console.log(mediaItem);
-                console.log(mediaItem.info);
+                mediaItem = JSON.parse(text);
             }
         });
     };
@@ -389,39 +407,188 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** createFooter
   //**************************************************************************
     var createFooter = function(parent){
-        footer = createElement("div", parent, "footer");
+        footer = createElement("div", parent, "footer center noselect");
         addShowHide(footer);
+        var tr = createTable(footer).addRow();
 
-        //
-        var backButton = createElement("div", footer, {
-            display: "inline-block"
+
+      //Add play/pause button
+        button["play"] = createPlayButton(tr.addColumn(), (isSelected)=>{
+            console.log("isPlaying", isSelected);
+            if (isSelected){
+                startSlideshow();
+            }
+            else{
+                stopSlideshow();
+            }
         });
-        backButton.className = "back-button";
-        backButton.onclick = function(){
-            carousel.back();
-        };
 
 
-        var stopButton = createElement("div", footer, {
-            display: "inline-block"
+      //Add face detection toggle button
+        button["face"] = createButton("face button", tr.addColumn(), (isSelected)=>{
+            if (isSelected){
+                if (mediaItem.faces){
+                    showFaces();
+                }
+                else{
+                    get("/Features?item=" + mediaItem.id + "&label=FACE" +
+                        "&format=json&fields=coordinates", {
+                        success: function(text){
+                            mediaItem.faces = JSON.parse(text);
+                            showFaces();
+                        }
+                    });
+                }
+            }
+            else{
+                hideFaces();
+            }
         });
-        stopButton.className = "stop-button";
-        stopButton.onclick = function(){
 
+
+      //Add info/metadata toggle button
+        button["info"] = createButton("info button", tr.addColumn(), (isSelected)=>{
+            if (isSelected) console.log("Show info");
+            else console.log("hide info");
+        });
+
+
+      //Add like toggle button
+        button["like"] = createButton("like button", tr.addColumn(), (isSelected)=>{
+            if (isSelected) console.log("Like!");
+            else console.log("no like...");
+        });
+
+    };
+
+
+  //**************************************************************************
+  //** createButton
+  //**************************************************************************
+    var createButton = function(icon, parent, onClick){
+        var button = createElement("div", parent, icon);
+        button.onclick = function(){
+            var isSelected = this.isSelected();
+            if (isSelected) this.deselect();
+            else this.select();
+            onClick.apply(this, [!isSelected]);
+        };
+        button.select = function(){
+            if (!this.isSelected()) this.classList.add("selected");
+        };
+        button.deselect = function(){
+            this.classList.remove("selected");
+        };
+        button.isSelected = function(){
+            return (this.className.indexOf("selected")>-1);
+        };
+        addShowHide(button);
+        return button;
+    };
+
+
+  //**************************************************************************
+  //** createPlayButton
+  //**************************************************************************
+    var createPlayButton = function(parent, onClick){
+
+        var button = createElement("div", parent, "play-button center");
+        createElement("div", button, "pause-left");
+        createElement("div", button, "pause-right");
+        createElement("div", button, "play-top");
+        createElement("div", button, "play-bottom");
+
+
+
+        var className = "pause";
+        button.isPaused = function(){
+            return this.className.indexOf(className)>-1;
         };
 
-
-        var playButton = createElement("div", footer, "play-button");
-        playButton.onclick = function(){
-
+        button.toggle = function(){
+            if (this.isPaused()) this.classList.remove(className);
+            else this.classList.add(className);
         };
 
-
-        var nextButton = createElement("div", footer, "next-button");
-        nextButton.onclick = function(){
-            carousel.next();
+        button.pause = function(){
+            if (!this.isPaused()) this.classList.add(className);
         };
 
+        button.play = function(){
+            if (this.isPaused()) this.classList.remove(className);
+        };
+
+        button.pause();
+
+
+      //Process play/pause button events
+        button.onclick = function() {
+            button.toggle();
+            onClick.apply(this, [!this.isPaused()]);
+        };
+
+        return button;
+    };
+
+
+  //**************************************************************************
+  //** showFaces
+  //**************************************************************************
+    var showFaces = function(){
+
+        console.log(width, height);
+        console.log(mediaItem.info.width, mediaItem.info.height);
+
+      //Find upper left corner of image in DOM space
+        //var rect = javaxt.dhtml.utils.getRect(visibleDiv);
+
+
+      //Add rectangles
+        mediaItem.faces.forEach((face)=>{
+            var rect = face.coordinates.rect;
+            console.log(rect);
+        });
+    };
+
+
+  //**************************************************************************
+  //** hideFaces
+  //**************************************************************************
+    var hideFaces = function(){
+
+    };
+
+
+  //**************************************************************************
+  //** startSlideshow
+  //**************************************************************************
+    var startSlideshow = function() {
+        var elem = document.documentElement;
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        }
+        else if (elem.webkitRequestFullscreen) { /* Safari */
+            elem.webkitRequestFullscreen();
+        }
+        else if (elem.msRequestFullscreen) { /* IE11 */
+          elem.msRequestFullscreen();
+        }
+    };
+
+
+  //**************************************************************************
+  //** stopSlideshow
+  //**************************************************************************
+    var stopSlideshow = function() {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+        else if (document.webkitExitFullscreen) { /* Safari */
+            document.webkitExitFullscreen();
+        }
+        else if (document.msExitFullscreen) { /* IE11 */
+            document.msExitFullscreen();
+        }
     };
 
 
