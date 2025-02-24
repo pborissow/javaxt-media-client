@@ -363,6 +363,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             rightButton.hide();
         };
 
+
+        carousel.onResize = function(){
+
+            resizeFaces();
+
+        };
     };
 
 
@@ -370,33 +376,40 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** updatePanel
   //**************************************************************************
     var updatePanel = function(div, item){
-        var img = createElement("img", div, {
-            display: "none"
-        });
-        img.panel = div;
+
         visibleDiv = div;
-
-        img.onload = function(){
-            this.panel.style.backgroundImage = "url(\"" +  this.src + "\")";
-            width = this.width;
-            height = this.height;
-            this.parentNode.removeChild(this);
-        };
-
-        img.onerror = function(){
-            this.panel.className += " not-available";
-            this.parentNode.removeChild(this);
-        };
-
-
-        var rect = javaxt.dhtml.utils.getRect(div);
-        img.src = "image?width=" + rect.width + "&id=" + item.id;
-
+        visibleDiv.innerHTML = "";
+        visibleDiv.style.backgroundImage = "none";
 
 
         get("/MediaItem?id=" + item.id, {
             success: function(text){
                 mediaItem = JSON.parse(text);
+
+                var img = createElement("img", parent, {
+                    display: "none"
+                });
+
+
+                img.onload = function(){
+                    visibleDiv.style.backgroundImage = "url(\"" +  this.src + "\")";
+                    width = this.width;
+                    height = this.height;
+
+                    if (button["face"].isSelected()) showFaces();
+
+                    this.parentNode.removeChild(this);
+                };
+
+                img.onerror = function(){
+                    visibleDiv.className += " not-available";
+                    parent.removeChild(this);
+                };
+
+
+                var rect = javaxt.dhtml.utils.getRect(div);
+                img.src = "image?width=" + rect.width + "&id=" + item.id;
+
             }
         });
     };
@@ -426,23 +439,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
       //Add face detection toggle button
         button["face"] = createButton("face button", tr.addColumn(), (isSelected)=>{
-            if (isSelected){
-                if (mediaItem.faces){
-                    showFaces();
-                }
-                else{
-                    get("/Features?item=" + mediaItem.id + "&label=FACE" +
-                        "&format=json&fields=coordinates", {
-                        success: function(text){
-                            mediaItem.faces = JSON.parse(text);
-                            showFaces();
-                        }
-                    });
-                }
-            }
-            else{
-                hideFaces();
-            }
+            if (isSelected) showFaces();
+            else hideFaces();
         });
 
 
@@ -532,21 +530,106 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
 
   //**************************************************************************
+  //** createOverlay
+  //**************************************************************************
+    var createOverlay = function(){
+
+        if (visibleDiv.childNodes.length>0){
+            return visibleDiv.childNodes[0];
+        }
+
+        var rect = javaxt.dhtml.utils.getRect(visibleDiv);
+        var overlay = createElement("div", visibleDiv, {
+            position: "absolute",
+            width: width+"px",
+            height: height+"px",
+            left: (rect.width-width)/2 + "px",
+            top: (rect.height-height)/2 + "px"
+            //border: "1px solid red"
+        });
+        overlay.className = "overlay";
+        addShowHide(overlay);
+        return overlay;
+    };
+
+
+  //**************************************************************************
   //** showFaces
   //**************************************************************************
     var showFaces = function(){
 
-        console.log(width, height);
-        console.log(mediaItem.info.width, mediaItem.info.height);
+        if (visibleDiv.childNodes.length>0){
+            resizeFaces(true);
+            visibleDiv.childNodes[0].show();
+            return;
+        }
 
-      //Find upper left corner of image in DOM space
-        //var rect = javaxt.dhtml.utils.getRect(visibleDiv);
+
+      //Get facial features and render rectangles
+        var id = mediaItem.id ;
+        get("/Features?item=" + mediaItem.id + "&label=FACE" +
+            "&format=json&fields=coordinates", {
+            success: function(text){
+                if (mediaItem.id!==id) return;
+                mediaItem.faces = JSON.parse(text);
+
+              //Create container for the faces
+                var overlay = createOverlay();
 
 
-      //Add rectangles
-        mediaItem.faces.forEach((face)=>{
-            var rect = face.coordinates.rect;
-            console.log(rect);
+              //Compute scaling
+                var w, h;
+                var orientation = mediaItem.info.orientation;
+                if (!orientation) orientation = 1;
+                console.log(orientation);
+                if (orientation<5){
+                    w = width/mediaItem.info.width;
+                    h = height/mediaItem.info.height;
+                }
+                else{
+                    w = width/mediaItem.info.height;
+                    h = height/mediaItem.info.width;
+
+                  //Hack for incorrect orientation (e.g. image was rotated
+                  //but the orientation flag wasn't updated)
+                    if (mediaItem.info.width<mediaItem.info.height){
+                        w = width/mediaItem.info.width;
+                        h = height/mediaItem.info.height;
+                    }
+                }
+
+
+              //Add rectangles
+                mediaItem.faces.forEach((face)=>{
+                    var rect = face.coordinates.rect;
+
+
+                    /* TODO: Rotate rectangle?
+                    case 1: return; //"Top, left side (Horizontal / normal)"
+                    case 2: flip(); break; //"Top, right side (Mirror horizontal)";
+                    case 3: rotate(180); break; //"Bottom, right side (Rotate 180)";
+                    case 4: {flip(); rotate(180);} break; //"Bottom, left side (Mirror vertical)";
+                    case 5: {flip(); rotate(270);} break; //"Left side, top (Mirror horizontal and rotate 270 CW)";
+                    case 6: rotate(90); break; //"Right side, top (Rotate 90 CW)";
+                    case 7: {flip(); rotate(90);} break; //"Right side, bottom (Mirror horizontal and rotate 90 CW)";
+                    case 8: rotate(270); break; //"Left side, bottom (Rotate 270 CW)";
+                    */
+
+
+                    var box = createElement("div", overlay, {
+                        position: "absolute",
+                        width: rect.w*w + "px",
+                        height: rect.h*h + "px",
+                        left: rect.x*w + "px",
+                        top: rect.y*h + "px"
+                    });
+                    box.className = "face";
+                    box.onclick = function(){
+                        console.log(face);
+                    };
+
+                });
+            }
         });
     };
 
@@ -555,7 +638,25 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** hideFaces
   //**************************************************************************
     var hideFaces = function(){
+        if (visibleDiv.childNodes.length>0){
+            visibleDiv.childNodes[0].hide();
+        }
+    };
 
+
+  //**************************************************************************
+  //** resizeFaces
+  //**************************************************************************
+    var resizeFaces = function(forceResize){
+
+        if (visibleDiv && visibleDiv.childNodes.length>0){
+            var div = visibleDiv.childNodes[0];
+            if (forceResize===true || div.isVisible()){
+                var rect = javaxt.dhtml.utils.getRect(visibleDiv);
+                div.style.left = (rect.width-width)/2 + "px";
+                div.style.top = (rect.height-height)/2 + "px";
+            }
+        }
     };
 
 

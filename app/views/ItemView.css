@@ -181,133 +181,144 @@
     }
 
 
+  /**************************************************************************/
+  /** Overlay
+  /**************************************************************************/
+    .overlay{
+
+        .face {
+            border: 1px solid red;
+        }
+
+        .face:hover {
+            background-color: rgba(255, 0, 0, 0.1);
+        }
+    }
+
 
   /**************************************************************************/
   /** Footer
   /**************************************************************************/
-
+  /** Button bar that appears below a media item
+  */
     .footer {
         height: 30px;
         max-width: 400px;
         text-align: center;
+
+
+        .button {
+            cursor: pointer;
+        }
+
+        .button:before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 400; /* far (regular) */
+            font-size: var(--icon-size);
+            color: var(--icon-color);
+        }
+
+        .button:hover:before {
+            color: var(--icon-hover);
+        }
+
+        .button.selected:before {
+            font-weight: 900; /* fas (solid) */
+            color: var(--icon-selected);
+        }
+
+        .info.button:before {
+            content: "\f15c"; /* file */
+        }
+
+        .like.button:before {
+            content: "\f004"; /* heart */
+        }
+
+        .face.button:before {
+            content: "\f007"; /* user */
+        }
+
+        .settings.button:before {
+            content: "\f1de";
+        }
+
+
+        /**************************************************************************/
+        /** Play/Pause Button (Footer Button)
+        /**************************************************************************/
+
+        .play-button {
+          height: var(--icon-size);
+          width: var(--icon-size);
+          display: block;
+          overflow: hidden;
+          position: relative;
+          cursor: pointer;
+        }
+
+        .play-button:hover > div {
+            background-color: var(--icon-hover);
+        }
+
+        .pause-left,
+        .pause-right {
+          height: 100%;
+          float: right;
+          width: 36%;
+          background-color: var(--icon-color);
+          -webkit-transition: all 0.25s ease;
+          transition: all 0.25s ease;
+        }
+
+        .pause-left {
+          float: left;
+        }
+
+        .pause-right {
+          float: right;
+        }
+
+        .play-top {
+          -webkit-transform: translate(0, -100%);
+                  transform: translate(0, -100%);
+        }
+
+        .play-bottom {
+          -webkit-transform: translate(0, 100%);
+                  transform: translate(0, 100%);
+        }
+
+        .play-top,
+        .play-bottom {
+          position: absolute;
+          top: 0;
+          right: 0;
+          background-color: transparent;
+          width: 0;
+          height: 0;
+          border-right: var(--icon-size) solid var(--background-color);
+          border-top: 9px solid transparent;
+          border-bottom: 9px solid transparent;
+          -webkit-transition: -webkit-transform 0.25s ease;
+          transition: -webkit-transform 0.25s ease;
+          transition: transform 0.25s ease;
+          transition: transform 0.25s ease, -webkit-transform 0.25s ease;
+        }
+
+        .pause .pause-left,
+        .pause .pause-right {
+          width: 50%;
+        }
+
+        .pause .play-top {
+          -webkit-transform: translate(0, -50%);
+                  transform: translate(0, -50%);
+        }
+        .pause .play-bottom {
+          -webkit-transform: translate(0, 50%);
+                  transform: translate(0, 50%);
+        }
+
     }
-
-
-  /**************************************************************************/
-  /** Footer Buttons
-  /**************************************************************************/
-
-    .button {
-        cursor: pointer;
-    }
-
-    .button:before {
-        font-family: "Font Awesome 5 Free";
-        font-weight: 400; /* far (regular) */
-        font-size: var(--icon-size);
-        color: var(--icon-color);
-    }
-
-    .button:hover:before {
-        color: var(--icon-hover);
-    }
-
-    .button.selected:before {
-        font-weight: 900; /* fas (solid) */
-        color: var(--icon-selected);
-    }
-
-    .info.button:before {
-        content: "\f15c"; /* file */
-    }
-
-    .like.button:before {
-        content: "\f004"; /* heart */
-    }
-
-    .face.button:before {
-        content: "\f007"; /* user */
-    }
-
-    .settings.button:before {
-        content: "\f1de";
-    }
-
-
-  /**************************************************************************/
-  /** Play/Pause Button (Footer Button)
-  /**************************************************************************/
-
-    .play-button {
-      height: var(--icon-size);
-      width: var(--icon-size);
-      display: block;
-      overflow: hidden;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .play-button:hover > div {
-        background-color: var(--icon-hover);
-    }
-
-    .pause-left,
-    .pause-right {
-      height: 100%;
-      float: right;
-      width: 36%;
-      background-color: var(--icon-color);
-      -webkit-transition: all 0.25s ease;
-      transition: all 0.25s ease;
-    }
-
-    .pause-left {
-      float: left;
-    }
-
-    .pause-right {
-      float: right;
-    }
-
-    .play-top {
-      -webkit-transform: translate(0, -100%);
-              transform: translate(0, -100%);
-    }
-
-    .play-bottom {
-      -webkit-transform: translate(0, 100%);
-              transform: translate(0, 100%);
-    }
-
-    .play-top,
-    .play-bottom {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background-color: transparent;
-      width: 0;
-      height: 0;
-      border-right: var(--icon-size) solid var(--background-color);
-      border-top: 9px solid transparent;
-      border-bottom: 9px solid transparent;
-      -webkit-transition: -webkit-transform 0.25s ease;
-      transition: -webkit-transform 0.25s ease;
-      transition: transform 0.25s ease;
-      transition: transform 0.25s ease, -webkit-transform 0.25s ease;
-    }
-
-    .pause .pause-left,
-    .pause .pause-right {
-      width: 50%;
-    }
-
-    .pause .play-top {
-      -webkit-transform: translate(0, -50%);
-              transform: translate(0, -50%);
-    }
-    .pause .play-bottom {
-      -webkit-transform: translate(0, 50%);
-              transform: translate(0, 50%);
-    }
-
 }
