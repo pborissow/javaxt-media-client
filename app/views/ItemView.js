@@ -21,6 +21,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
   //Components
     var carousel, footer, button = {};
+    var contextMenu;
 
   //Carousel-specific variables
     var retriever;
@@ -33,6 +34,10 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var width, height;
     var visibleDiv;
 
+  //Slideshow related variables
+    var timer;
+    var fx;
+
 
   //**************************************************************************
   //** Constructor
@@ -41,6 +46,9 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
         if (!config) config = {};
         merge(config, defaultConfig);
+
+        fx = config.fx;
+        if (!fx) fx = new javaxt.dhtml.Effects();
 
 
       //Create main div
@@ -67,6 +75,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         });
         closeButton.className = "close-button";
         closeButton.onclick = function(){
+            stopSlideshow();
             me.hide();
         };
 
@@ -75,6 +84,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         var table = createTable(mainDiv);
         createBody(table.addRow().addColumn({height: "100%" }));
         createFooter(table.addRow().addColumn());
+
+
+      //Create context menu
+        contextMenu = new javaxt.dhtml.Callout(mainDiv,{
+            style: config.style.callout
+        });
 
 
       //Watch for keyboard events
@@ -95,13 +110,14 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** clear
   //**************************************************************************
     this.clear = function(){
+        if (timer) clearInterval(timer);
         footer.hide();
         carousel.hideNav();
         carousel.getPanels().forEach((panel)=>{
             panel.div.innerHTML = "";
             panel.div.style.backgroundImage = "";
         });
-
+        contextMenu.hide();
         mediaItem = null;
     };
 
@@ -219,7 +235,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         carousel = new javaxt.dhtml.Carousel(div, {
             loop: true,
             animate: true,
-            slideOver: true
+            slideOver: true,
+            fx: fx
         });
 
         carousel.getVisiblePanel = function(){
@@ -242,10 +259,19 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         }
 
 
-      //Watch for beforeChange events. Update the contents of the "next" panel
-      //before the transition.
+      //Watch for beforeChange events
         carousel.beforeChange = function(currPanel, nextPanel, direction){
 
+
+          //Update opacity if the slideshow is playing
+            if (timer){
+                if (button["face"].isSelected()) button["face"].click();
+                nextPanel.style.opacity = 0;
+                fx.fadeOut(currPanel, "ease", 500);
+            }
+
+
+          //Update the contents of the "next" panel before the transition.
             if (direction=="next"){
                 if (currItem+1<mediaItems.length){
                     currItem++;
@@ -323,6 +349,17 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         };
 
 
+      //Watch for onChange events
+        carousel.onChange = function(currPanel, prevPanel){
+            if (timer){
+                fx.fadeIn(currPanel, "easeIn", 1000, ()=>{
+                    prevPanel.style.opacity = "";
+                });
+            }
+            else{
+                currPanel.style.opacity = "";
+            }
+        };
 
 
       //Add button to move left
@@ -407,7 +444,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                 };
 
 
-                var rect = javaxt.dhtml.utils.getRect(div);
+                var rect = javaxt.dhtml.utils.getRect(carousel.el);
                 img.src = "image?width=" + rect.width + "&id=" + item.id;
 
             }
@@ -427,13 +464,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
       //Add play/pause button
         button["play"] = createPlayButton(tr.addColumn(), (isSelected)=>{
-            console.log("isPlaying", isSelected);
-            if (isSelected){
-                startSlideshow();
-            }
-            else{
-                stopSlideshow();
-            }
+            if (isSelected) startSlideshow();
+            else stopSlideshow();
         });
 
 
@@ -534,12 +566,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //**************************************************************************
     var createOverlay = function(){
 
-        if (visibleDiv.childNodes.length>0){
-            return visibleDiv.childNodes[0];
-        }
+        var overlay = getOverlay();
+        if (overlay) return overlay;
+
 
         var rect = javaxt.dhtml.utils.getRect(visibleDiv);
-        var overlay = createElement("div", visibleDiv, {
+        overlay = createElement("div", visibleDiv, {
             position: "absolute",
             width: width+"px",
             height: height+"px",
@@ -554,13 +586,25 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
 
   //**************************************************************************
+  //** getOverlay
+  //**************************************************************************
+    var getOverlay = function(){
+        if (visibleDiv && visibleDiv.childNodes.length>0){
+            return visibleDiv.childNodes[0];
+        }
+        return null;
+    };
+
+
+  //**************************************************************************
   //** showFaces
   //**************************************************************************
     var showFaces = function(){
 
-        if (visibleDiv.childNodes.length>0){
+        var overlay = getOverlay();
+        if (overlay){
             resizeFaces(true);
-            visibleDiv.childNodes[0].show();
+            overlay.show();
             return;
         }
 
@@ -568,7 +612,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
       //Get facial features and render rectangles
         var id = mediaItem.id ;
         get("/Features?item=" + mediaItem.id + "&label=FACE" +
-            "&format=json&fields=coordinates", {
+            "&fields=id,coordinates&format=json", {
             success: function(text){
                 if (mediaItem.id!==id) return;
                 mediaItem.faces = JSON.parse(text);
@@ -624,8 +668,19 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                         top: rect.y*h + "px"
                     });
                     box.className = "face";
-                    box.onclick = function(){
-                        console.log(face);
+                    box.face = face;
+                    box.onclick = function(e){
+                        onFaceClick(this, e);
+                    };
+                    box.oncontextmenu = function(e){
+                        onFaceClick(this, e);
+                    };
+
+                    box.onmouseover = function(e){
+                        if (this.face.person){
+                            var innerDiv = contextMenu.getInnerDiv();
+                            innerDiv.innerHTML = this.face.person;
+                        }
                     };
 
                 });
@@ -638,9 +693,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** hideFaces
   //**************************************************************************
     var hideFaces = function(){
-        if (visibleDiv.childNodes.length>0){
-            visibleDiv.childNodes[0].hide();
-        }
+        var overlay = getOverlay();
+        if (overlay) overlay.hide();
     };
 
 
@@ -649,14 +703,114 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //**************************************************************************
     var resizeFaces = function(forceResize){
 
-        if (visibleDiv && visibleDiv.childNodes.length>0){
-            var div = visibleDiv.childNodes[0];
-            if (forceResize===true || div.isVisible()){
+        var overlay = getOverlay();
+        if (overlay){
+            if (forceResize===true || overlay.isVisible()){
                 var rect = javaxt.dhtml.utils.getRect(visibleDiv);
-                div.style.left = (rect.width-width)/2 + "px";
-                div.style.top = (rect.height-height)/2 + "px";
+                overlay.style.left = (rect.width-width)/2 + "px";
+                overlay.style.top = (rect.height-height)/2 + "px";
             }
         }
+    };
+
+
+  //**************************************************************************
+  //** onFaceClick
+  //**************************************************************************
+    var onFaceClick = function(box, e){
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (e.button===2){
+
+            var innerDiv = contextMenu.getInnerDiv();
+            innerDiv.innerHTML = "";
+            createMenu(box.face, innerDiv);
+
+
+            var x = e.offsetX; //e.clientX;
+            var y = e.offsetY; //e.clientY;
+
+            var rect = javaxt.dhtml.utils.getRect(box);
+            x+=rect.x;
+            y=rect.y+rect.height-20;
+
+            contextMenu.showAt(x, y, "below", "left");
+        }
+        else{
+            console.log("show details");
+        }
+    };
+
+
+  //**************************************************************************
+  //** createMenu
+  //**************************************************************************
+    var createMenu = function(face, parent){
+        var menu = createElement("div", parent, "menu");
+
+        if (face.person){
+
+            var editMenu = createElement("div", menu, "menu-item edit-user");
+            editMenu.innerText = "Edit Person";
+            editMenu.onclick = function(){
+                console.log("editFace", face);
+                contextMenu.hide();
+            };
+
+        }
+        else{
+
+            var editMenu = createElement("div", menu, "menu-item add-user");
+            editMenu.innerText = "Tag Person";
+            editMenu.onclick = function(){
+                editFace(face);
+                contextMenu.hide();
+            };
+
+            var deleteMenu = createElement("div", menu, "menu-item delete");
+            deleteMenu.innerText = "Remove Rectangle";
+            deleteMenu.onclick = function(){
+                deleteFace(face);
+                contextMenu.hide();
+            };
+        }
+    };
+
+
+  //**************************************************************************
+  //** editFace
+  //**************************************************************************
+    var editFace = function(face){
+        console.log("editFace", face);
+    };
+
+
+  //**************************************************************************
+  //** deleteFace
+  //**************************************************************************
+    var deleteFace = function(face){
+
+        del("/Feature?id=" + face.id, {
+            success: function(){
+                var overlay = getOverlay();
+                if (overlay){
+                    for (var i=0; i<overlay.childNodes.length; i++){
+                        var box = overlay.childNodes[i];
+                        if (box.face){
+                            if (box.face.id===face.id){
+                                overlay.removeChild(box);
+                                return;
+                            }
+                        }
+                    }
+                }
+            },
+            failure: function(request){
+                alert(request);
+            }
+        });
+
     };
 
 
@@ -674,6 +828,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         else if (elem.msRequestFullscreen) { /* IE11 */
           elem.msRequestFullscreen();
         }
+
+        timer = setInterval(carousel.next, 4000);
     };
 
 
@@ -681,14 +837,21 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** stopSlideshow
   //**************************************************************************
     var stopSlideshow = function() {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        }
-        else if (document.webkitExitFullscreen) { /* Safari */
-            document.webkitExitFullscreen();
-        }
-        else if (document.msExitFullscreen) { /* IE11 */
-            document.msExitFullscreen();
+        if (timer){
+            clearInterval(timer);
+            timer = null;
+
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+            else if (document.webkitExitFullscreen) { /* Safari */
+                document.webkitExitFullscreen();
+            }
+            else if (document.msExitFullscreen) { /* IE11 */
+                document.msExitFullscreen();
+            }
+
+            setTimeout(carousel.resize, 800);
         }
     };
 
@@ -700,6 +863,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var addShowHide = javaxt.dhtml.utils.addShowHide;
     var createTable = javaxt.dhtml.utils.createTable;
     var merge = javaxt.dhtml.utils.merge;
+    var del = javaxt.dhtml.utils.delete;
     var get = javaxt.dhtml.utils.get;
 
     init();
