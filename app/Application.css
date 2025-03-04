@@ -57,5 +57,6 @@
 
 .app-header-menu.noselect.warning {
     position: absolute;
+    right: 0;
+    display: none;
 }
-

@@ -1,4 +1,6 @@
 .javaxt-media-explorer {
+    width: 100%;
+    height: 100%;
     background-color: #000;
 
 
@@ -29,18 +31,18 @@
     }
 
 
-    .panel-toolbar .back:after,
-    .panel-toolbar .edit:after {
+    .panel-toolbar .back:before,
+    .panel-toolbar .edit:before {
         font-family: "Font Awesome 5 Free";
         font-weight: 900; /* fas (solid) */
         font-size: 14px;
     }
 
-    .panel-toolbar .back:after {
+    .panel-toolbar .back:before {
         content: "\f062"; /* fa-arrow-up */
     }
 
-    .panel-toolbar .edit:after {
+    .panel-toolbar .edit:before {
         content: "\f044"; /* fa-arrow-up */
     }
 
