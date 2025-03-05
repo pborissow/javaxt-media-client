@@ -76,7 +76,9 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         closeButton.className = "close-button";
         closeButton.onclick = function(){
             stopSlideshow();
+            button["play"].pause();
             me.hide();
+            exitFullScreen();
         };
 
 
@@ -217,7 +219,6 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     };
 
 
-
   //**************************************************************************
   //** createBody
   //**************************************************************************
@@ -267,7 +268,9 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             if (timer){
                 if (button["face"].isSelected()) button["face"].click();
                 nextPanel.style.opacity = 0;
-                fx.fadeOut(currPanel, "ease", 500);
+                fx.fadeOut(currPanel, "ease", 500, function(){
+                    this.style.display = "";
+                });
             }
 
 
@@ -360,6 +363,22 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                 currPanel.style.opacity = "";
             }
         };
+
+
+      //Watch for drag events
+        carousel.onDragStart = function(currPanel){
+            carousel.getPanels().forEach((panel)=>{
+                if (panel.div!==currPanel){
+                    panel.div.style.opacity = 0;
+                }
+            });
+        };
+        carousel.onDragEnd = function(){
+            carousel.getPanels().forEach((panel)=>{
+                panel.div.style.opacity = "";
+            });
+        };
+
 
 
       //Add button to move left
@@ -818,6 +837,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** startSlideshow
   //**************************************************************************
     var startSlideshow = function() {
+
+      //Enter fullscreen
         var elem = document.documentElement;
         if (elem.requestFullscreen) {
             elem.requestFullscreen();
@@ -829,6 +850,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
           elem.msRequestFullscreen();
         }
 
+
+      //Update carousel after resize (just in case)
+        setTimeout(carousel.resize, 800);
+
+
+      //Start slideshow
         timer = setInterval(carousel.next, 4000);
     };
 
@@ -840,19 +867,25 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         if (timer){
             clearInterval(timer);
             timer = null;
-
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-            else if (document.webkitExitFullscreen) { /* Safari */
-                document.webkitExitFullscreen();
-            }
-            else if (document.msExitFullscreen) { /* IE11 */
-                document.msExitFullscreen();
-            }
-
-            setTimeout(carousel.resize, 800);
         }
+    };
+
+
+  //**************************************************************************
+  //** exitFullScreen
+  //**************************************************************************
+    var exitFullScreen = function(){
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+        else if (document.webkitExitFullscreen) { /* Safari */
+            document.webkitExitFullscreen();
+        }
+        else if (document.msExitFullscreen) { /* IE11 */
+            document.msExitFullscreen();
+        }
+
+        setTimeout(carousel.resize, 800);
     };
 
 
