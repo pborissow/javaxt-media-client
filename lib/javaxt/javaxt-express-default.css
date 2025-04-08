@@ -1,0 +1,193 @@
+
+/**************************************************************************/
+/** Waitmask
+/**************************************************************************/
+
+.waitmask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #272a31;
+    opacity: 0.8;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    transition: opacity 0.4s;
+}
+
+
+/**************************************************************************/
+/** Material Spinner
+/**************************************************************************/
+
+.spinner {
+    position: relative;
+    top: 50%;
+    -webkit-transform: translateY(-50%);
+    -ms-transform: translateY(-50%);
+    transform: translateY(-50%);
+    margin: 0 auto;
+}
+
+.spinner svg {
+  -webkit-animation: spinner-rotator 1.4s linear infinite;
+          animation: spinner-rotator 1.4s linear infinite;
+
+   -webkit-transition: opacity 1.4s ease-out; /* Safari */
+           transition: opacity 1.4s ease-out;
+
+    opacity: 0;
+}
+
+.spinner circle {
+  stroke: #4285F4;
+  stroke-dasharray: 187;
+  stroke-dashoffset: 0;
+  -webkit-transform-origin: center;
+          transform-origin: center;
+  -webkit-animation: spinner-dash 1.4s ease-in-out infinite;
+          animation: spinner-dash 1.4s ease-in-out infinite;
+}
+
+@-webkit-keyframes spinner-rotator {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(270deg);
+            transform: rotate(270deg);
+  }
+}
+
+@keyframes spinner-rotator {
+  0% {
+    -webkit-transform: rotate(0deg);
+            transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(270deg);
+            transform: rotate(270deg);
+  }
+}
+
+@-webkit-keyframes spinner-dash {
+  0% {
+    stroke-dashoffset: 187;
+  }
+  50% {
+    stroke-dashoffset: 46.75;
+    -webkit-transform: rotate(135deg);
+            transform: rotate(135deg);
+  }
+  100% {
+    stroke-dashoffset: 187;
+    -webkit-transform: rotate(450deg);
+            transform: rotate(450deg);
+  }
+}
+@keyframes spinner-dash {
+  0% {
+    stroke-dashoffset: 187;
+  }
+  50% {
+    stroke-dashoffset: 46.75;
+    -webkit-transform: rotate(135deg);
+            transform: rotate(135deg);
+  }
+  100% {
+    stroke-dashoffset: 187;
+    -webkit-transform: rotate(450deg);
+            transform: rotate(450deg);
+  }
+}
+
+
+/**************************************************************************/
+/** Communications Error Popup
+/**************************************************************************/
+/** Popup that appears on the top of the page used to notify users that an
+ *   app is offline.
+ */
+.communication-error {
+    position: relative;
+    width: 525px;
+    min-height: 64px;
+    background-color: #ffeef1;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 12px 14px 0 rgba(0, 0, 0, 0.2), 0 13px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.communication-error-icon,
+.communication-error .title {
+    height: 24px;
+    font-size: 20px;
+    display: inline-block;
+    float:left;
+}
+
+.communication-error .title {
+    margin: 0 0 0 10px;
+}
+
+.communication-error .message {
+    font-size: 11px;
+    display: inline-block;
+    color: #686868;
+    margin: 8px 0 0 0;
+}
+
+.communication-error .close {
+    position: absolute;
+    text-align: center;
+    border-radius: 3px;
+    right: 7px;
+    top: 7px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.communication-error .close:hover {
+    background-color: #ebc3ca;
+}
+
+.communication-error .close:before {
+    content: "\2715"; /*unicode for &#x2715;*/
+    color: #9d172e;
+}
+
+
+
+/**************************************************************************/
+/** Communications Error Icon
+/**************************************************************************/
+
+.communication-error-icon {
+    width: 30px;
+    height: 24px;
+    font-size: 20px;
+    display: inline-block;
+    position: relative;
+    color: #9d172e;
+}
+
+.communication-error-icon:before,
+.communication-error-icon:after {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    position: absolute;
+
+}
+
+.communication-error-icon:after{
+    content: "\f12a"; /* exclaimation */
+    left: 11px;
+}
+
+.communication-error-icon:before{
+    content: "\f1eb"; /* wifi */
+    opacity: 0.2;
+    font-size: 24px;
+}
