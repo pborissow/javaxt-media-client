@@ -16,6 +16,11 @@
         background-repeat:no-repeat;
         background-position: center center;
         cursor: pointer;
+        transition: 0.1s cubic-bezier(0, 0, 1, 0.6);
+    }
+
+    .thumbnail:hover {
+        transform: scale(110%);
     }
 
 

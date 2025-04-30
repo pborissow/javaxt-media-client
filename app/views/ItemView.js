@@ -21,13 +21,19 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
   //Components
     var carousel, footer, button = {};
+
+
+  //Context menu-specific variables
     var contextMenu;
+    var menuTimer;
+
 
   //Carousel-specific variables
     var retriever;
     var mediaItems = [];
     var currItem = 0;
     var numItems = -1;
+    var dragging = false;
 
   //Current/visible item
     var mediaItem = null;
@@ -295,22 +301,21 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                                     }
                                     else{
 
+                                        var newItems = 0;
                                         items.forEach((mediaItem)=>{
-
-                                            var newItems = 0;
                                             if (!mediaItem.isFolder){
                                                 mediaItems.push(mediaItem);
                                                 newItems++;
                                             }
-
-                                            if (newItems===0){
-                                                fetchItems();
-                                            }
-                                            else{
-                                                currItem++;
-                                                updatePanel(nextPanel, mediaItems[currItem]);
-                                            }
                                         });
+
+                                        if (newItems===0){
+                                            fetchItems();
+                                        }
+                                        else{
+                                            currItem++;
+                                            updatePanel(nextPanel, mediaItems[currItem]);
+                                        }
                                     }
 
                                 }
@@ -367,6 +372,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
       //Watch for drag events
         carousel.onDragStart = function(currPanel){
+            dragging = true;
+            contextMenu.hide();
             carousel.getPanels().forEach((panel)=>{
                 if (panel.div!==currPanel){
                     panel.div.style.opacity = 0;
@@ -374,6 +381,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             });
         };
         carousel.onDragEnd = function(){
+            dragging = false;
             carousel.getPanels().forEach((panel)=>{
                 panel.div.style.opacity = "";
             });
@@ -688,18 +696,37 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                     });
                     box.className = "face";
                     box.face = face;
+
                     box.onclick = function(e){
                         onFaceClick(this, e);
                     };
+
                     box.oncontextmenu = function(e){
                         onFaceClick(this, e);
                     };
 
                     box.onmouseover = function(e){
+
+                      //Update context menu (show person's name)
                         if (this.face.person){
                             var innerDiv = contextMenu.getInnerDiv();
                             innerDiv.innerHTML = this.face.person;
                         }
+
+                      //Show context menu
+                        if (menuTimer) clearTimeout(menuTimer);
+                        showMenu(this, e);
+                    };
+
+                    box.onmouseout = function(e){
+
+                      //Hide context menu after a slight delay. The timer will
+                      //be cancelled if the user
+                        if (menuTimer) clearTimeout(menuTimer);
+                        menuTimer = setTimeout(()=>{
+                            contextMenu.hide();
+                        }, 50);
+
                     };
 
                 });
@@ -740,25 +767,44 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         e.preventDefault();
         e.stopPropagation();
 
-        if (e.button===2){
 
-            var innerDiv = contextMenu.getInnerDiv();
-            innerDiv.innerHTML = "";
-            createMenu(box.face, innerDiv);
-
-
-            var x = e.offsetX; //e.clientX;
-            var y = e.offsetY; //e.clientY;
-
-            var rect = javaxt.dhtml.utils.getRect(box);
-            x+=rect.x;
-            y=rect.y+rect.height-20;
-
-            contextMenu.showAt(x, y, "below", "left");
+        if (box.face.person){
+            console.log("show details", box.face.person);
         }
         else{
-            console.log("show details");
+            if (menuTimer) clearTimeout(menuTimer);
+            showMenu(box, e);
         }
+
+    };
+
+
+  //**************************************************************************
+  //** showMenu
+  //**************************************************************************
+    var showMenu = function(box, e){
+        if (dragging) return;
+
+        var innerDiv = contextMenu.getInnerDiv();
+        innerDiv.innerHTML = "";
+        createMenu(box.face, innerDiv);
+
+
+        var x = e.offsetX; //e.clientX;
+        var y = e.offsetY; //e.clientY;
+
+        var rect = javaxt.dhtml.utils.getRect(box);
+
+        if (!e.button || e.button===0){
+            x=rect.x+10;
+            y=rect.y+rect.height-20;
+        }
+        else{
+            x+=rect.x;
+            y=rect.y+rect.height-20;
+        }
+
+        contextMenu.showAt(x, y, "below", "left");
     };
 
 
@@ -767,6 +813,11 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //**************************************************************************
     var createMenu = function(face, parent){
         var menu = createElement("div", parent, "menu");
+
+        menu.onmouseover = function(e){
+            if (menuTimer) clearTimeout(menuTimer);
+        };
+
 
         if (face.person){
 

@@ -170,7 +170,8 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
 
         var thumbnailContainer = createElement("div", innerDiv, {
             position: "relative",
-            textAlign: "center"
+            textAlign: "center",
+            overflow: "hidden"
         });
 
 
