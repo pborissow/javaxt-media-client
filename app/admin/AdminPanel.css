@@ -95,9 +95,14 @@
 
     .user-stats {
         height: 250px;
-        background-color: #fff;
-        border-bottom: 1px solid #ddd;
+        background-color: #464649;
+        border-bottom: 1px solid #272a31;
     }
+
+    .user-stats text {
+        fill: #bebebf;
+    }
+
 
     .user-status {
         display: inline-block;
