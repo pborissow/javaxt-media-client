@@ -2,15 +2,13 @@ if(!javaxt) var javaxt={};
 if(!javaxt.media) javaxt.media={};
 if(!javaxt.media.webapp) javaxt.media.webapp={};
 
-
 //******************************************************************************
-//**  MyClass
+//**  Utils
 //******************************************************************************
 /**
- *   Used to...
+ *   Common functions and utilities
  *
  ******************************************************************************/
-
 
 javaxt.media.webapp.utils = {
 
@@ -43,6 +41,65 @@ javaxt.media.webapp.utils = {
         }
 
         return new javaxt.dhtml.Button(toolbar, btn);
+    },
+
+
+  //**************************************************************************
+  //** createSpacer
+  //**************************************************************************
+  /** Used to create a toolbar spacer
+   */
+    createSpacer: function(toolbar){
+        javaxt.dhtml.utils.createElement("div", toolbar, "toolbar-spacer");
+    },
+
+
+  //**************************************************************************
+  //** getPixel
+  //**************************************************************************
+    getPixel: function(){
+        var pixel = javaxt.media.webapp.pixel;
+        if (!pixel){
+            var canvas = document.createElement('canvas');
+            canvas.width = 1;
+            canvas.height = 1;
+            pixel = canvas.toDataURL('image/png');
+            javaxt.media.webapp.pixel = pixel;
+        }
+        return pixel;
+    },
+
+
+  //**************************************************************************
+  //** parseResponse
+  //**************************************************************************
+    parseResponse: function(response){
+        var s = response.substring(0,1);
+        if (s=="{" || s=="["){
+            var json = JSON.parse(response);
+            if (json.cols && json.rows){ //conflate response
+
+                var rows = json.rows;
+                var cols = {};
+                for (var i=0; i<json.cols.length; i++){
+                    cols[json.cols[i]] = i;
+                }
+                for (var i=0; i<rows.length; i++){
+                    var row = rows[i];
+                    var obj = {};
+                    for (var col in cols) {
+                        if (cols.hasOwnProperty(col)){
+                            obj[col] = row[cols[col]];
+                        }
+                    }
+                    rows[i] = obj;
+                }
+
+                json = rows;
+            }
+            response = json;
+        }
+        return response;
     }
 
 };

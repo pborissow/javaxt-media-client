@@ -28,6 +28,7 @@ javaxt.media.webapp.UserAdmin = function(parent, config) {
 
       //Create main table
         var table = createTable(parent);
+        table.className = "javaxt-media-user-admin";
 
 
       //Create stats panel

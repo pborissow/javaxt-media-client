@@ -1,0 +1,12 @@
+.javaxt-media-browser-admin {
+
+    .config-row .browser-icon {
+        opacity: 0.85;
+        transition: 0.2s;
+    }
+
+    .config-row:hover .browser-icon {
+        opacity: 1;
+    }
+
+}
