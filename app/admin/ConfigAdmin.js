@@ -36,6 +36,17 @@ javaxt.media.webapp.ConfigAdmin = function (parent, config) {
             cls: javaxt.media.webapp.AppAdmin
         });
 
+        panel.addRow({
+            icon: "fas fa-envelope",
+            title: "Email Server",
+            cls: javaxt.media.webapp.EmailAdmin
+        });
+
+        panel.addRow({
+            icon: "fas fa-database",
+            title: "Database Connection",
+            cls: javaxt.media.webapp.DatabaseAdmin
+        });
 
         panel.addRow({
             icon: "far fa-compass",
