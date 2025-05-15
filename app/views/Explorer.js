@@ -51,23 +51,23 @@ javaxt.media.webapp.Explorer = function(parent, config) {
         waitmask = config.waitmask;
 
 
-      //Create main table
-        var table = createTable(parent);
-        table.className = "javaxt-media-explorer noselect";
+      //Create panel
+        var panel = new javaxt.dhtml.Panel(parent, {
+            className: "javaxt-media-explorer noselect"
+        });
+        me.el = panel.el;
+        addShowHide(me);
 
 
       //Create panels
-        createHeader(table.addRow().addColumn());
-        createBody(table.addRow().addColumn({height: "100%" }));
-        createFooter(table.addRow().addColumn());
+        createTitle(panel.getHeader());
+        createToolbar(panel.getToolbar());
+        createBody(panel.getBody());
+        createFooter(panel.getFooter());
 
 
       //Watch for forward and back events via a 'popstate' listener
         enablePopstateListener();
-
-
-        me.el = table;
-        addShowHide(me);
     };
 
 
@@ -189,16 +189,6 @@ javaxt.media.webapp.Explorer = function(parent, config) {
   //**************************************************************************
     this.getTitle = function(){
         return title.innerText;
-    };
-
-
-  //**************************************************************************
-  //** createHeader
-  //**************************************************************************
-    var createHeader = function(parent){
-        var table = createTable(parent);
-        createTitle(table.addRow().addColumn());
-        createToolbar(table.addRow().addColumn());
     };
 
 

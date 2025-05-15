@@ -17,33 +17,37 @@
   /**************************************************************************/
 
     .panel-toolbar {
+
         background-color: inherit;
         border-top: 2px solid #20232b;
         border-bottom: 0 none;
-    }
 
 
-    .panel-toolbar .toolbar-button {
-        background-color: inherit;
-        border-color: rgba(0,0,0,0);
-        width: 100%; /* reset width */
-        margin-top: -8px;
-    }
+        .toolbar-button {
+            background-color: inherit;
+            border-color: rgba(0,0,0,0);
+        }
+
+        .toolbar-button-label {
+            width: unset;
+        }
 
 
-    .panel-toolbar .back:before,
-    .panel-toolbar .edit:before {
-        font-family: "Font Awesome 5 Free";
-        font-weight: 900; /* fas (solid) */
-        font-size: 14px;
-    }
+        .back:before,
+        .edit:before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900; /* fas (solid) */
+            font-size: 14px;
+        }
 
-    .panel-toolbar .back:before {
-        content: "\f062"; /* fa-arrow-up */
-    }
+        .back:before {
+            content: "\f062"; /* fa-arrow-up */
+        }
 
-    .panel-toolbar .edit:before {
-        content: "\f044"; /* fa-arrow-up */
+        .edit:before {
+            content: "\f044";
+        }
+
     }
 
 }
