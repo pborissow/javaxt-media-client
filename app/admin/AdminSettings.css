@@ -21,10 +21,9 @@
     .subheader {
         font-size: 14px;
         line-height: 14px;
-        margin-top: -10px;
         margin-left: 75px;
         position: absolute;
-        bottom: 8px;
+        bottom: 3px;
         z-index: 1;
         cursor: pointer;
     }
@@ -88,6 +87,7 @@
     .config-row:hover,
     .panel .table-row:hover{ /*override javaxt table*/
         background-color:#212939;
+        color:#fff;
     }
 
     .config-row:last-child {

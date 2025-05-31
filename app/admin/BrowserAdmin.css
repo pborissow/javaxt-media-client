@@ -1,6 +1,12 @@
 .javaxt-media-browser-admin {
 
-    .config-row .browser-icon {
+
+    .browser-icon {
+        display: inline;
+        margin: 0 auto;
+        background-repeat: no-repeat;
+        width: 28px;
+        height: 28px;
         opacity: 0.85;
         transition: 0.2s;
     }

@@ -28,10 +28,15 @@ javaxt.media.webapp.UserList = function(parent, config) {
         if (!config.style) config.style = javaxt.dhtml.style.default;
 
 
-        var table = createTable(parent);
-        createToolbar(table.addRow().addColumn("panel-toolbar"));
-        createBody(table.addRow().addColumn({height: "100%"}));
-        me.el = table;
+      //Create panel
+        var panel = new javaxt.dhtml.Panel(parent, {
+            style: config.style.panel
+        });
+        me.el = panel.el;
+        addShowHide(me);
+
+        createToolbar(panel.getToolbar());
+        createBody(panel.getBody());
     };
 
 
@@ -74,7 +79,7 @@ javaxt.media.webapp.UserList = function(parent, config) {
   //** createToolbar
   //**************************************************************************
     var createToolbar = function(parent){
-        var toolbar = createElement('div', parent);
+        var toolbar = parent;
 
         var createButton = javaxt.media.webapp.utils.createButton;
         var createSpacer = function(){
@@ -143,11 +148,45 @@ javaxt.media.webapp.UserList = function(parent, config) {
 
         grid = new javaxt.dhtml.DataGrid(parent, {
             style: config.style.table,
-            url: "users",
+            url: "Users",
             filter: filter,
-            fields: ["id","firstName","lastName","fullName","accessLevel","status"],
+            getResponse: function(url, payload, callback){
+
+                get(url, {
+                    payload: payload,
+                    success: function(text, xml, url, request){
+
+                        var users = parseResponse(text);
+                        var ids = users.map(user => user.personID);
+                        get("PersonNames?personID=" + ids.join(","),{
+                            success: function(text, xml, url, request){
+                                var names = parseResponse(text);
+                                users.forEach((user)=>{
+                                    var personID = user.personID;
+                                    user.names = [];
+                                    names.forEach((name)=>{
+                                        if (name.personID==personID){
+                                            user.names.push(name);
+                                            if (name.preferred) user.name = name.name;
+                                        }
+                                    });
+                                    if (!user.name) user.name = user.names[0].name;
+                                });
+                                request.responseText = JSON.stringify(users);
+                                callback.apply(me, [request]);
+                            },
+                            failure: function(request){
+                                callback.apply(me, [request]);
+                            }
+                        });
+                    },
+                    failure: function(request){
+                        callback.apply(me, [request]);
+                    }
+                });
+            },
             parseResponse: function(request){
-                return parseResponse(request.responseText);
+                return JSON.parse(request.responseText);
             },
             columns: [
                 {header: 'ID', hidden:true},
@@ -163,18 +202,9 @@ javaxt.media.webapp.UserList = function(parent, config) {
                 div.style.height = "100%";
                 var statusIcon = createElement("div", div, "user-status");
                 statusIcon.style.float = "left";
-                createElement("span", div).innerHTML = getName(user);
+                createElement("span", div).innerHTML = user.name;
                 row.set('Name', div);
 
-
-              //Render role
-                var role = user.accessLevel;
-                if (role==5) role = "Administrator";
-                if (role==4) role = "Advanced";
-                if (role==3) role = "Contributor";
-                if (role==2) role = "Browser";
-                if (role==1) role = "Custom";
-                row.set('Role', role);
 
 
               //Render status
@@ -429,7 +459,6 @@ javaxt.media.webapp.UserList = function(parent, config) {
 
 
     var parseResponse = javaxt.media.webapp.utils.parseResponse;
-    var getName = javaxt.media.webapp.utils.getName;
 
     init();
 };

@@ -71,7 +71,6 @@ javaxt.media.webapp.AdminPanel = function(parent, config) {
                 container: "db-view",
                 leftPanel: "left-panel",
                 bottomPanel: "bottom-panel",
-                editor: "editor",
                 table: javaxt.dhtml.style.default.table,
                 toolbarButton: javaxt.dhtml.style.default.toolbarButton
             }

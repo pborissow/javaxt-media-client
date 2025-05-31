@@ -10,10 +10,9 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
 
     var me = this;
     var defaultConfig = {
-
+        fileService: "dir/"
     };
 
-    var fileService = "dir/";
     var fileBrowser;
     var callout;
     var waitmask;
@@ -24,40 +23,25 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
   //**************************************************************************
     var init = function(){
 
+
+      //Clone the config so we don't modify the original config object
+        var clone = {};
+        merge(clone, config);
+
+
+      //Merge clone with default config
+        merge(clone, defaultConfig);
+        config = clone;
+
+
       //Parse config
-        config = merge(config, defaultConfig);
         if (!config.style) config.style = javaxt.dhtml.style.default;
         if (!config.waitmask) config.waitmask = new javaxt.express.WaitMask(document.body);
         waitmask = config.waitmask;
 
 
-        var mainDiv = createElement("div", parent, {
-            width: "100%",
-            height: "100%"
-        });
-        addShowHide(mainDiv);
-        me.el = mainDiv;
-
-
-
       //Create file browser
-        fileBrowser = new javaxt.express.FileBrowser(mainDiv, {
-            fileService: fileService,
-            style: {
-                toolbar: {
-                    panel: "panel-toolbar",
-                    button: config.style.toolbarButton,
-                    path: "form-input",
-                    icons: {
-                        back: "fas fa-arrow-left",
-                        forward: "fas fa-arrow-right",
-                        up: "fas fa-arrow-up",
-                        refresh: "fas fa-sync-alt"
-                    }
-                },
-                table: config.style.table
-            }
-        });
+        fileBrowser = createFileBrowser(parent, config);
 
 
       //Watch for click events
@@ -70,9 +54,12 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
                 rightClick = e.button == 2;
 
             if (rightClick){
-                if (!callout) createCallout();
+                if (!callout) createCallout(fileBrowser.el);
                 callout.update(item);
-                callout.showAt(e.pageX, e.pageY, "right", "top");
+                var rect = javaxt.dhtml.utils.getRect(fileBrowser.el);
+                var x = (e.pageX-rect.x)+10;
+                var y = e.pageY-rect.y;
+                callout.showAt(x, y, "right", "top");
             }
             else{
                 if (item.type==="Folder"){
@@ -111,6 +98,8 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
         }, false);
 
 
+        me.el = fileBrowser.el;
+        addShowHide(me);
     };
 
 
@@ -134,12 +123,12 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
   //**************************************************************************
   //** notify
   //**************************************************************************
-    this.notify = function(op, model, id, userID){
+    this.notify = function(op, model, data, userID){
 
         if (model==="WebFile"){
-            var path = id;
+            var path = data;
             var dir = fileBrowser.getDirectory();
-            if (dir.length>0){
+            if (path && dir.length>0){
 
                 if (path.indexOf(dir)===0){
                     var fileName = path.substring(dir.length);
@@ -170,32 +159,30 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
   //**************************************************************************
   /** Used to create a context menu for the file grid
    */
-    var createCallout = function(){
+    var createCallout = function(parent){
 
 
       //Create callout
-        callout = new javaxt.dhtml.Callout(document.body,{
+        callout = new javaxt.dhtml.Callout(parent, {
             style: config.style.callout
         });
 
 
       //Create file menu
-        var fileMenu = createElement("div", callout.getInnerDiv(), "callout-menu");
+        var fileMenu = createElement("div", callout.getInnerDiv(), "menu");
         addShowHide(fileMenu);
         fileMenu.hide();
 
 
       //Create folder menu
-        var folderMenu = createElement("div", callout.getInnerDiv(), "callout-menu");
+        var folderMenu = createElement("div", callout.getInnerDiv(), "menu");
         addShowHide(folderMenu);
         folderMenu.hide();
 
 
         var createMenuItem = function(icon, label, parent, onClick){
-            var menuItem = createElement("div", parent, "callout-menu-item noselect");
-            createElement("div", menuItem, icon);
-            var text = createElement("div", menuItem);
-            text.innerText = label;
+            var menuItem = createElement("div", parent, "menu-item " + icon);
+            menuItem.innerText = label;
             menuItem.onclick = function(){
                 if (onClick) onClick.apply(me, [callout.item]);
                 callout.hide();
@@ -205,23 +192,23 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
 
 
       //Populate file menu
-        createMenuItem("fas fa-file-download", "Download", fileMenu, download);
-        createMenuItem("far fa-edit", "Rename", fileMenu, (item)=>{
+        createMenuItem("download-file", "Download", fileMenu, download);
+        createMenuItem("edit", "Rename", fileMenu, (item)=>{
             console.log("Rename File");
             console.log(item);
         });
-        createMenuItem("far fa-trash-alt", "Delete", fileMenu, (item)=>{
+        createMenuItem("trash", "Delete", fileMenu, (item)=>{
             console.log("Delete File");
             console.log(item);
         });
 
 
       //Populate folder menu
-        createMenuItem("far fa-edit", "Rename", folderMenu, (item)=>{
+        createMenuItem("edit", "Rename", folderMenu, (item)=>{
             console.log("Rename Folder");
             console.log(item);
         });
-        createMenuItem("far fa-trash-alt", "Delete", folderMenu, (item)=>{
+        createMenuItem("trash", "Delete", folderMenu, (item)=>{
             console.log("Delete Folder");
             console.log(item);
         });
@@ -253,7 +240,7 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
         if (!link) link = createElement("a", me.el, {
             display: "none"
         });
-        link.setAttribute("href", fileService + "download?path=" + encodeURIComponent(path));
+        link.setAttribute("href", config.fileService + "download?path=" + encodeURIComponent(path));
         link.setAttribute("download", item.name);
         link.click();
     };
@@ -268,7 +255,7 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
         var name = file.name;
         //console.log(file.size);
         formData.append(name, file);
-        post(fileService+"upload", formData, {
+        post(config.fileService+"upload", formData, {
             success: function(){},
             failure: function(){},
             finally: function(){
@@ -299,6 +286,7 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
     var post = javaxt.dhtml.utils.post;
     var get = javaxt.dhtml.utils.get;
 
+    var createFileBrowser = javaxt.media.webapp.utils.createFileBrowser;
 
     init();
 };

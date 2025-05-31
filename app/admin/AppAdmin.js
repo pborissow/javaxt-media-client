@@ -10,11 +10,12 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
 
     var me = this;
     var defaultConfig = {
-
+        apps: ["ImageMagick", "FFmpeg", "OpenCV"],
+        fileService: "dir/"
     };
-    var waitmask;
+
+    var waitmask, fileBrowser;
     var rows = {};
-    var timer;
 
 
   //**************************************************************************
@@ -37,16 +38,18 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
         if (!config.waitmask) config.waitmask = new javaxt.express.WaitMask(document.body);
         waitmask = config.waitmask;
 
-        var div = createElement("div", parent, "config-table");
+        var div = createElement("div", parent, "javaxt-media-app-admin");
+        me.el = div;
 
 
+      //Create table
         var table = createTable(div);
         table.style.height = "";
-        table.className = "javaxt-media-app-admin";
+        table.className = "config-table";
+        config.apps.forEach((app)=>{
+            addRow(table, app);
+        });
 
-
-
-        me.el = div;
 
       //Add public show/hide methods
         addShowHide(me);
@@ -74,7 +77,25 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
   //**************************************************************************
     this.update = function(){
         me.clear();
-
+        waitmask.show(500);
+        get("settings?fields=key,value&format=json&key=" +
+            config.apps.join(",").toLowerCase(), {
+            success: function(text){
+                var settings = JSON.parse(text);
+                updateRows(settings);
+            },
+            failure: function(request){
+                if (request.status===404){
+                    updateRows([]);
+                }
+                else{
+                    alert(request);
+                }
+            },
+            finally: function(){
+                waitmask.hide();
+            }
+        });
     };
 
 
@@ -83,12 +104,8 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
   //**************************************************************************
     this.notify = function(op, model, data){
         if (model==="Setting"){
-            if (data.key==="ffmpeg"){
-
-            }
-            else if (data.key==="image_magick"){
-
-            }
+            var row = rows[data.key];
+            if (row) row.path.innerText = data.value;
         }
     };
 
@@ -96,12 +113,12 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
   //**************************************************************************
   //** updateConfig
   //**************************************************************************
-    var updateConfig = function(){
+    var updateConfig = function(key, path, callback){
 
-      //Save settings and update the table
         waitmask.show(500);
-        save(config.url, payload, {
+        save("setting?key=" + key.toLowerCase(), path, {
             success: function(){
+                if (callback) callback.apply(me, [key, path]);
                 me.update();
             },
             failure: function(request){
@@ -114,6 +131,113 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** updateRows
+  //**************************************************************************
+    var updateRows = function(settings){
+        settings.forEach((setting)=>{
+            var row = rows[setting.key];
+            row.path.innerText = setting.value;
+        });
+    };
+
+
+  //**************************************************************************
+  //** addRow
+  //**************************************************************************
+    var addRow = function(table, appName){
+        var key = appName.toLowerCase();
+
+
+      //Create new row
+        var tr = table.addRow("config-row noselect");
+
+
+      //Add icon
+        tr.addColumn("app-icon " + key);
+
+
+      //Add label
+        tr.addColumn("app-label").innerText = appName;
+
+
+      //Add path
+        var path = tr.addColumn("app-path");
+        path.style.width = "100%";
+
+
+      //Process row click events
+        tr.onclick = function(){
+            openFileBrowser(appName, path.innerText);
+        };
+
+
+      //Update rows
+        rows[key] = {
+            path: path
+        };
+    };
+
+
+  //**************************************************************************
+  //** openFileBrowser
+  //**************************************************************************
+    var openFileBrowser = function(appName, path, callback){
+
+        if (!fileBrowser){
+
+          //Create file browser
+            fileBrowser = createFileBrowser(document.body, config);
+            fileBrowser.onClick = function(item, path, row, e){
+                var selectButton = fileBrowser.buttons["Select"];
+                if (item.type==="Folder"){
+                    fileBrowser.setDirectory(path);
+                    selectButton.disabled = true;
+                }
+                else{
+                    selectButton.disabled = false;
+                    selectButton.path = path;
+                    if (e.detail===2) selectButton.click();
+                }
+            };
+            fileBrowser.onDirectoryChange = function(){
+                fileBrowser.buttons["Select"].disabled = true;
+            };
+
+
+          //Add buttons
+            var footer = fileBrowser.getFooter();
+            var buttonDiv = createElement('div', footer, config.style.window.footerButtonBar); //
+            var buttonRow = createTable(buttonDiv).addRow();
+            var td = buttonRow.addColumn();
+            td.style.width="100%";
+
+            fileBrowser.buttons = {};
+            ["Select","Cancel"].forEach((name)=>{
+                var input = createElement('input', td, config.style.window.footerButton);
+                input.type = "button";
+                input.name = name;
+                input.value = name;
+                fileBrowser.buttons[name] = input;
+            });
+
+            var selectButton = fileBrowser.buttons["Select"];
+            selectButton.disabled = true;
+            selectButton.onclick = function(){
+                updateConfig(fileBrowser.appName, this.path, fileBrowser.close);
+            };
+
+            fileBrowser.buttons["Cancel"].onclick = ()=>{
+                fileBrowser.close();
+            };
+        }
+
+        fileBrowser.appName = appName;
+        fileBrowser.setDirectory(path);
+        fileBrowser.setTitle(appName);
+        fileBrowser.open();
+    };
+
 
   //**************************************************************************
   //** Utils
@@ -125,6 +249,8 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
     var save = javaxt.dhtml.utils.post;
     var get = javaxt.dhtml.utils.get;
 
+
+    var createFileBrowser = javaxt.media.webapp.utils.createFileBrowser;
 
     init();
 };

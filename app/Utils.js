@@ -55,6 +55,124 @@ javaxt.media.webapp.utils = {
 
 
   //**************************************************************************
+  //** createWindow
+  //**************************************************************************
+    createWindow: function(config){
+        var parent = document.body;
+        var arr = document.getElementsByClassName("javaxt-media-server");
+        if (arr.length>0) parent = arr[0];
+
+        var win = new javaxt.dhtml.Window(parent, config);
+        if (!javaxt.media.webapp.windows) javaxt.media.webapp.windows = [];
+        javaxt.media.webapp.windows.push(win);
+        return win;
+    },
+
+
+  //**************************************************************************
+  //** createFileBrowser
+  //**************************************************************************
+  /** Used to create a file browser
+   */
+    createFileBrowser: function(parent, config){
+        var createElement = javaxt.dhtml.utils.createElement;
+        var merge = javaxt.dhtml.utils.merge;
+
+        var defaultConfig = {
+            style: {
+                toolbar: {
+                    panel: "panel-toolbar",
+                    button: config.style.toolbarButton,
+                    path: "form-input",
+                    icons: {
+                        back: "fas fa-arrow-left",
+                        forward: "fas fa-arrow-right",
+                        up: "fas fa-arrow-up",
+                        refresh: "fas fa-sync-alt"
+                    }
+                },
+                table: config.style.table
+            },
+            renderers: {
+                iconRenderer: function(item){
+                    var icon;
+                    if (item.type==="Folder"){
+                        icon = "folder";
+                    }
+                    else{
+                        var arr = item.type.split("/");
+                        var type = arr[0];
+                        var subtype = arr[1];
+                        if (type=="image") icon = "image";
+                        else if (type=="video") icon = "video";
+                        else icon = "file";
+                    }
+
+                    return createElement("i", icon + " icon");
+                }
+            }
+        };
+
+
+      //Clone the config so we don't modify the original config object
+        var clone = {};
+        merge(clone, config);
+
+
+      //Merge clone with default config
+        merge(clone, defaultConfig);
+        config = clone;
+
+
+      //Update parent as needed
+        if (parent===document.body){
+
+          //Create window
+            var win = javaxt.media.webapp.utils.createWindow({
+                title: config.title,
+                width: 600,
+                height: 450,
+                modal: true,
+                closable: true,
+                style: config.style.window
+            });
+
+
+          //Update parent
+            parent = win.getBody();
+
+
+          //Update className
+            parent.classList.add("javaxt-file-browser");
+
+
+          //Hide info
+            config.style.info = {
+                display: "none"
+            };
+
+        }
+
+
+      //Create file browser
+        var fileBrowser = new javaxt.express.FileBrowser(parent, config);
+
+
+      //Copy window methods to the file browser
+        if (win){
+            for (var m in win) {
+                if (typeof win[m] == "function") {
+                    if (fileBrowser[m]==null) fileBrowser[m] = win[m];
+                }
+            }
+        }
+
+
+        return fileBrowser;
+    },
+
+
+  //**************************************************************************
   //** getPixel
   //**************************************************************************
     getPixel: function(){

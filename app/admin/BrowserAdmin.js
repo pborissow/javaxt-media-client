@@ -37,12 +37,13 @@ javaxt.media.webapp.BrowserAdmin = function(parent, config) {
         if (!config.waitmask) config.waitmask = new javaxt.express.WaitMask(document.body);
         waitmask = config.waitmask;
 
-        var div = createElement("div", parent, "config-table");
+        var div = createElement("div", parent, "javaxt-media-browser-admin");
+        me.el = div;
 
 
         var table = createTable(div);
         table.style.height = "";
-        table.className = "javaxt-media-browser-admin";
+        table.className = "config-table";
 
 
         ["Chrome", "Edge", "Brave", "Firefox", "Safari", "Opera", "Internet Explorer"]
@@ -50,7 +51,6 @@ javaxt.media.webapp.BrowserAdmin = function(parent, config) {
             rows[browser] = addRow(table, browser);
         });
 
-        me.el = div;
 
       //Add public show/hide methods
         addShowHide(me);

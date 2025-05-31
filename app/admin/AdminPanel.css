@@ -42,7 +42,7 @@
         text-align: center;
         font-size: 200px;
         color: #3a3e45;
-        text-shadow: -6px 3px 6px #000000;
+        text-shadow: -6px 3px 6px #000;
     }
 
 
@@ -55,37 +55,64 @@
         width: 100%;
         height: 100%;
         background-color: inherit;
+
+
+
+        .left-panel {
+            background-color: #33363f; /* panel toolbar */
+            border-right: 1px solid #4c5258; /* button border */
+        }
+
+
+
+        textarea {
+            background-color: #23252b;
+            color: #97989c; /* same as table */
+            font-size: 14px !important;
+        }
+
+
+        .bottom-panel {
+            background-color: inherit;
+            border-top: none;
+        }
+
+        /*
+        .tree-node:hover {
+
+        }
+        */
+
+
+        .toolbar-button {
+            .run-icon:before,
+            .stop-icon:before {
+                font-family: "Font Awesome 5 Free";
+                font-weight: 900; /* fas (solid) */
+                font-size: 14px;
+                color: #53585a;
+            }
+
+            .run-icon:before {
+                content: "\f04b";
+            }
+
+            .stop-icon:before {
+                content: "\f04d";
+            }
+        }
+
+
+        .toolbar-button:hover {
+            .run-icon:before {
+                color: #4ea568;
+            }
+            .stop-icon:before {
+                color: #5d4e55;
+                color: #dd8b8b;
+            }
+        }
+
     }
-
-
-    .db-view .left-panel {
-        background-color: #33363f; /* panel toolbar */
-        border-right: 1px solid #4c5258; /* button border */
-    }
-
-
-    .db-view .editor {
-        height: 240px;
-
-    }
-
-    .db-view .editor textarea {
-        background-color: #23252b;
-        font-family: "Consolas", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
-        font-size: 14px;
-        color: #97989c; /* same as table */
-    }
-
-
-    .db-view .bottom-panel {
-        background-color: inherit;
-        border-top: none;
-    }
-
-    /*
-    .db-view .tree-node:hover {
-
-    }
-    */
 
 }

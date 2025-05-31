@@ -34,6 +34,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var currItem = 0;
     var numItems = -1;
     var dragging = false;
+    var sliding = false;
 
   //Current/visible item
     var mediaItem = null;
@@ -268,7 +269,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
       //Watch for beforeChange events
         carousel.beforeChange = function(currPanel, nextPanel, direction){
-
+            sliding = true;
 
           //Update opacity if the slideshow is playing
             if (timer){
@@ -362,10 +363,16 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             if (timer){
                 fx.fadeIn(currPanel, "easeIn", 1000, ()=>{
                     prevPanel.style.opacity = "";
+                    var overlay = getOverlay();
+                    if (overlay) overlay.show();
+                    sliding = false;
                 });
             }
             else{
                 currPanel.style.opacity = "";
+                var overlay = getOverlay();
+                if (overlay) overlay.show();
+                sliding = false;
             }
         };
 
@@ -643,16 +650,18 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             success: function(text){
                 if (mediaItem.id!==id) return;
                 mediaItem.faces = JSON.parse(text);
+                if (mediaItem.faces.length===0) return;
 
               //Create container for the faces
                 var overlay = createOverlay();
+                overlay.hide();
 
 
               //Compute scaling
                 var w, h;
                 var orientation = mediaItem.info.orientation;
                 if (!orientation) orientation = 1;
-                console.log(orientation);
+                //console.log(orientation);
                 if (orientation<5){
                     w = width/mediaItem.info.width;
                     h = height/mediaItem.info.height;
@@ -730,6 +739,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                     };
 
                 });
+
+                if (!sliding) overlay.show();
             }
         });
     };

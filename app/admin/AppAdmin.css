@@ -1,0 +1,43 @@
+.javaxt-media-app-admin {
+
+
+    .app-path {
+        color: #7f8083;
+        padding: 0 7px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .app-icon {
+        padding: 0 5px;
+        opacity: 0.65;
+        transition: 0.2s;
+    }
+
+    .config-row:hover .app-icon{
+        opacity: 1;
+    }
+
+    .app-icon:after {
+        content: "";
+        width: 20px;
+        height: 20px;
+        position: relative;
+        display: inline-block;
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+    .app-icon.imagemagick:after {
+        background-image: url(../../images/apps/imagemagick.svg);
+    }
+
+    .app-icon.ffmpeg:after {
+        background-image: url(../../images/apps/ffmpeg.svg);
+    }
+
+    .app-icon.opencv:after {
+        background-image: url(../../images/apps/opencv.svg);
+    }
+
+}

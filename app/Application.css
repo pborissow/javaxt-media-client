@@ -1,99 +1,191 @@
-/**************************************************************************/
-/** Colors
-/**************************************************************************/
-
-:root {
-
-    --nav-color: #636363;
+.javaxt-media-server {
 
 
 
-    --green-background: #238f23;
-    --green-font: #edffed;
-    --green-background-hover: #008000;
-    --green-font-hover: #fff;
+  /**************************************************************************/
+  /** App Header
+  /**************************************************************************/
+
+    .app-header-menu .label {
+        display: none;
+    }
+
+    .app-header-menu.noselect.warning {
+        position: absolute;
+        right: 0;
+        display: none;
+    }
 
 
+  /**************************************************************************/
+  /** App Tabs/Navbar
+  /**************************************************************************/
+
+    .app-nav-bar {
+        background-color: #636363;
+        height: 36px;
+        line-height: 36px;
+    }
+
+    .app-tab-container {
+        float: right;
+        height: 100%;
+        padding: 0 20px;
+    }
+
+    .app-tab-container > div {
+        float: left;
+        min-width: 125px;
+        color: white;
+        text-align: center;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .app-tab-container > div:hover {
+        background-color: #6d7181;
+    }
+
+    .app-tab-container > div.active,
+    .app-tab-container > div.active:hover {
+        background-color: #50535f;
+    }
+
+
+
+  /**************************************************************************/
+  /** Browser Icons
+  /**************************************************************************/
+
+    .firefox {
+        background-image: url(../images/browsers/firefox.svg);
+    }
+    .edge {
+        background-image: url(../images/browsers/edge.svg);
+    }
+    .brave {
+        background-image: url(../images/browsers/brave.svg);
+    }
+    .chrome {
+        background-image: url(../images/browsers/chrome.svg);
+    }
+    .safari {
+        background-image: url(../images/browsers/safari.svg);
+    }
+    .opera {
+        background-image: url(../images/browsers/opera.svg);
+    }
+    .internet-explorer {
+        background-image: url(../images/browsers/internet-explorer.svg);
+    }
+
+
+
+  /**************************************************************************/
+  /** Context Menu
+  /**************************************************************************/
+  /** Style for menus found in context menus and callouts.
+   */
+    .callout-panel{
+
+        .menu {
+            padding: 3px 5px;
+            min-width: 95px;
+        }
+
+        .menu-item {
+            line-height: 22px;
+            border-radius: 4px;
+            padding: 0 10px 0 32px;
+            margin: 1px 0;
+        }
+
+        .menu-item:hover { /* This should be in dark & default css */
+            color: #fff;
+            background-color: #565e73;
+        }
+
+        .menu-item:before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900; /* fas (solid) */
+            font-size: 16px;
+            color: #8e8f92;
+            width: 24px;
+            text-align: center;
+            position: absolute;
+            left: 7px;
+        }
+
+        .menu-item:hover:before{
+            color: #b6b9c2;
+        }
+
+
+        .menu-item.download-file:before{
+            content: "\f56d"; /* fa-file-download */
+        }
+
+        .menu-item.trash:before{
+            content: "\f2ed"; /* trash-alt */
+            font-weight: 400;
+        }
+
+        .menu-item.edit:before{
+            content: "\f044"; /* edit */
+            font-weight: 400;
+        }
+
+    }
+
+
+  /**************************************************************************/
+  /** File Browser
+  /**************************************************************************/
+  /** Style for the file browser.
+   */
+    .javaxt-file-browser {
+
+        .icon:before {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900; /* fas (solid) */
+            font-size: 16px;
+            margin-right: 5px;
+            font-style: normal;
+            opacity: 1;
+
+        }
+
+        .folder.icon:before {
+            content: "\f07b";
+            color: #534631;
+        }
+
+        .file.icon:before {
+            content: "\f15b";
+        }
+
+        .image.icon:before {
+            content: "\f1c5";
+            color: #29536b;
+        }
+
+        .video.icon:before {
+            content: "\f1c8";
+            color: #296b59;
+        }
+
+
+        .table-row {
+            transition: color 0.2s;
+        }
+
+        .table-row:hover {
+            color:#fff;
+        }
+
+        .table-row:hover .icon:before {
+            opacity: 1;
+        }
+
+    }
 }
-
-
-
-/**************************************************************************/
-/** App Tabs/Navbar
-/**************************************************************************/
-
-.app-nav-bar {
-    background-color: var(--nav-color);
-    height: 36px;
-    line-height: 36px;
-}
-
-.app-tab-container {
-    float: right;
-    height: 100%;
-    padding: 0 20px;
-}
-
-.app-tab-container > div {
-    float: left;
-    min-width: 125px;
-    color: white;
-    text-align: center;
-    height: 100%;
-    cursor: pointer;
-}
-
-.app-tab-container > div:hover {
-    background-color: #6d7181;
-}
-
-.app-tab-container > div.active,
-.app-tab-container > div.active:hover {
-    background-color: #50535f;
-}
-
-
-
-
-.app-header-menu.noselect.warning {
-    position: absolute;
-    right: 0;
-    display: none;
-}
-
-
-
-/**************************************************************************/
-/** Browser Icons
-/**************************************************************************/
-
-.browser-icon {
-    display: inline;
-    margin: 0 auto;
-    background-repeat: no-repeat;
-    width: 28px;
-    height: 28px;
-}
-
-.firefox {
-    background-image: url(../images/browsers/firefox.svg);
-}
-.edge {
-    background-image: url(../images/browsers/edge.svg);
-}
-.brave {
-    background-image: url(../images/browsers/brave.svg);
-}
-.chrome {
-    background-image: url(../images/browsers/chrome.svg);
-}
-.safari {
-    background-image: url(../images/browsers/safari.svg);
-}
-.opera {
-    background-image: url(../images/browsers/opera.svg);
-}
-.internet-explorer {
-    background-image: url(../images/browsers/internet-explorer.svg);
-}
-

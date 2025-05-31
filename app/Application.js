@@ -19,11 +19,21 @@ javaxt.media.webapp.Application = function(parent, config) {
 
         name: "JavaXT Media Server",
 
-        /** If true, will add an admin tab */
+
+      /** If true, will add an admin tab.
+       */
         standAlone: true,
 
 
-        style: javaxt.dhtml.style.default
+      /** Style for javaxt components.
+       */
+        style: javaxt.dhtml.style.default,
+
+
+      /** A shared array of javaxt.dhtml.Window components.
+       */
+        windows: []
+
     };
 
 
@@ -36,10 +46,22 @@ javaxt.media.webapp.Application = function(parent, config) {
     var init = function(){
 
 
-        if (!config) config = {};
-        config = merge(config, defaultConfig);
+      //Clone the config so we don't modify the original config object
+        var clone = {};
+        merge(clone, config);
 
 
+      //Merge clone with default config
+        merge(clone, defaultConfig);
+        config = clone;
+
+
+      //Set app-wide shared config
+        if (!javaxt.media.webapp.windows)
+            javaxt.media.webapp.windows = config.windows;
+
+
+      //Create main panel
         var mainDiv = createElement("div", parent, {
             width: "100%",
             height: "100%",
@@ -48,11 +70,11 @@ javaxt.media.webapp.Application = function(parent, config) {
         mainDiv.className = "javaxt-media-server";
 
 
-
       //Instantiate main app (component with horizontal tabs)
         app = new javaxt.express.app.Horizon(mainDiv, {
             name: config.name,
             style: config.style,
+            windows: config.windows,
             useBrowserHistory: true
         });
 
