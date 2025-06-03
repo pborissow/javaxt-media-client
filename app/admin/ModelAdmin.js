@@ -1,16 +1,16 @@
 //******************************************************************************
-//**  AppAdmin
+//**  ModelAdmin
 //******************************************************************************
 /**
- *   Panel used to configure 3rd party apps (FFmpeg, ImageMagick, etc)
+ *   Panel used to identify models
  *
  ******************************************************************************/
 
-javaxt.media.webapp.AppAdmin = function(parent, config) {
+javaxt.media.webapp.ModelAdmin = function(parent, config) {
 
     var me = this;
     var defaultConfig = {
-        apps: ["ImageMagick", "FFmpeg"],
+        apps: ["Face Detection", "Facial Recognition"],
         fileService: "dir/"
     };
 
@@ -60,7 +60,7 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
   //** getTitle
   //**************************************************************************
     this.getTitle = function(){
-        return "Applications";
+        return "Models";
     };
 
 
@@ -79,7 +79,7 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
         me.clear();
         waitmask.show(500);
         get("settings?fields=key,value&format=json&key=" +
-            config.apps.join(",").toLowerCase(), {
+            config.apps.join(",").toLowerCase().replace(" ","_"), {
             success: function(text){
                 var settings = JSON.parse(text);
                 updateRows(settings);
@@ -116,7 +116,7 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
     var updateConfig = function(key, path, callback){
 
         waitmask.show(500);
-        save("setting?key=" + key.toLowerCase(), path, {
+        save("setting?key=" + key.toLowerCase().replace(" ","_"), path, {
             success: function(){
                 if (callback) callback.apply(me, [key, path]);
                 me.update();
@@ -146,7 +146,7 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
   //** addRow
   //**************************************************************************
     var addRow = function(table, appName){
-        var key = appName.toLowerCase();
+        var key = appName.toLowerCase().replace(" ","_");
 
 
       //Create new row
@@ -154,7 +154,7 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
 
 
       //Add icon
-        tr.addColumn("app-icon " + key);
+        tr.addColumn(key + " icon");
 
 
       //Add label

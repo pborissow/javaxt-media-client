@@ -17,43 +17,50 @@ javaxt.media.webapp.ConfigAdmin = function (parent, config) {
     var init = function(){
 
         panel = new javaxt.media.webapp.AdminSettings(parent, config);
+        panel.el.classList.add("javaxt-media-config-admin");
+
 
         panel.setHeader({
             title: "Config",
-            icon: "fas fa-sliders-h"
+            icon: "config icon"
         });
 
 
         panel.addRow({
-            icon: "fas fa-universal-access",
+            icon: "access icon",
             title: "Access Controls",
             cls: javaxt.media.webapp.SecurityAdmin
         });
 
         panel.addRow({
-            icon: "fas fa-desktop",
+            icon: "app icon",
             title: "External Applications",
             cls: javaxt.media.webapp.AppAdmin
         });
 
         panel.addRow({
-            icon: "fas fa-envelope",
+            icon: "model icon",
+            title: "Models",
+            cls: javaxt.media.webapp.ModelAdmin
+        });
+
+        panel.addRow({
+            icon: "email icon",
             title: "Email Server",
             cls: javaxt.media.webapp.EmailAdmin
         });
 
         panel.addRow({
-            icon: "fas fa-database",
+            icon: "database icon",
             title: "Database Connection",
             cls: javaxt.media.webapp.DatabaseAdmin
         });
 
         panel.addRow({
-            icon: "far fa-compass",
+            icon: "browser icon",
             title: "Supported Browsers",
             cls: javaxt.media.webapp.BrowserAdmin
         });
-
 
         for (var m in panel) {
             if (typeof panel[m] === "function") {

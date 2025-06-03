@@ -62,7 +62,7 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
                 callout.showAt(x, y, "right", "top");
             }
             else{
-                if (item.type==="Folder"){
+                if (item.type==="Drive" || item.type==="Folder"){
                     fileBrowser.setDirectory(path);
                 }
             }
@@ -116,7 +116,7 @@ javaxt.media.webapp.FileAdmin = function(parent, config) {
   //**************************************************************************
     this.update = function(){
         me.clear();
-        fileBrowser.setDirectory("/");
+        fileBrowser.setDirectory();
     };
 
 

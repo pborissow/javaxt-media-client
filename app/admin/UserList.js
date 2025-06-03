@@ -90,7 +90,7 @@ javaxt.media.webapp.UserList = function(parent, config) {
       //Add button
         addButton = createButton(toolbar, {
             label: "Add",
-            icon: "fas fa-plus-circle"
+            icon: "add icon"
         });
         addButton.onClick = function(){
             editUser();
@@ -100,7 +100,7 @@ javaxt.media.webapp.UserList = function(parent, config) {
       //Edit button
         editButton = createButton(toolbar, {
             label: "Edit",
-            icon: "fas fa-edit",
+            icon: "edit icon",
             disabled: true
         });
         editButton.onClick = function(){
@@ -113,7 +113,7 @@ javaxt.media.webapp.UserList = function(parent, config) {
       //Delete button
         deleteButton = createButton(toolbar, {
             label: "Delete",
-            icon: "fas fa-trash",
+            icon: "delete icon",
             disabled: true
         });
         deleteButton.onClick = function(){
@@ -129,7 +129,7 @@ javaxt.media.webapp.UserList = function(parent, config) {
       //Refresh button
         var refreshButton = createButton(toolbar, {
             label: "Refresh",
-            icon: "fas fa-sync-alt",
+            icon: "refresh icon",
             disabled: false,
             hidden: false
         });
@@ -210,7 +210,7 @@ javaxt.media.webapp.UserList = function(parent, config) {
               //Render status
                 var status = user.status;
                 if (status===1){
-                    row.set('Enabled', createElement("i", "fas fa-check"));
+                    row.set('Enabled', createElement("i", "check icon"));
                 }
 
 

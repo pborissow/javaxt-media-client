@@ -148,11 +148,28 @@
         .icon:before {
             font-family: "Font Awesome 5 Free";
             font-weight: 900; /* fas (solid) */
-            font-size: 16px;
-            margin-right: 5px;
             font-style: normal;
-            opacity: 1;
+        }
 
+        .up.icon:before{
+            content: "\f062"; /* fa-arrow-up */
+        }
+
+        .back.icon:before {
+            content: "\f060"; /* fa-arrow-left */
+        }
+
+        .forward.icon:before {
+            content: "\f061"; /* fa-arrow-right */
+        }
+
+        .refresh.icon:before {
+            content: "\f021"; /* fa-sync-alt */
+        }
+
+        .drive.icon:before {
+            content: "\f0a0";
+            color: #3b546b;
         }
 
         .folder.icon:before {
@@ -181,6 +198,12 @@
 
         .table-row:hover {
             color:#fff;
+        }
+
+
+        .table-row .icon:before {
+            margin-right: 5px;
+            font-size: 16px;
         }
 
         .table-row:hover .icon:before {

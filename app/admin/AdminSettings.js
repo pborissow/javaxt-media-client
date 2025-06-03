@@ -2,7 +2,10 @@
 //**  AdminSettings
 //******************************************************************************
 /**
- *   Panel used to render a panel with a header and a carousel body
+ *   Reusable panel used to render a header and a carousel with 2 pages. The
+ *   first page contains a list of settings. When a user clicks on a setting in
+ *   the list, a second page is slide into view. Use the addRow() method to
+ *   add an item to the list of settings in the first page.
  *
  ******************************************************************************/
 
@@ -82,6 +85,9 @@ javaxt.media.webapp.AdminSettings = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** setHeader
+  //**************************************************************************
     this.setHeader = function(config){
         headerRow.innerHTML = "";
 
@@ -96,6 +102,9 @@ javaxt.media.webapp.AdminSettings = function(parent, config) {
     };
 
 
+  //**************************************************************************
+  //** addRow
+  //**************************************************************************
     this.addRow = function(config){
         menu.addRow({
             icon: config.icon,
@@ -146,7 +155,7 @@ javaxt.media.webapp.AdminSettings = function(parent, config) {
         subtitle.hide();
 
 
-        var backIcon = createElement("div", subtitle, "fas fa-arrow-left");
+        var backIcon = createElement("div", subtitle, "back icon");
 
         var backText = createElement("div", subtitle);
         backText.innerText = config.title;

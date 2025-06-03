@@ -85,10 +85,10 @@ javaxt.media.webapp.utils = {
                     button: config.style.toolbarButton,
                     path: "form-input",
                     icons: {
-                        back: "fas fa-arrow-left",
-                        forward: "fas fa-arrow-right",
-                        up: "fas fa-arrow-up",
-                        refresh: "fas fa-sync-alt"
+                        back: "back icon",
+                        forward: "forward icon",
+                        up: "up icon",
+                        refresh: "refresh icon"
                     }
                 },
                 table: config.style.table
@@ -96,8 +96,8 @@ javaxt.media.webapp.utils = {
             renderers: {
                 iconRenderer: function(item){
                     var icon;
-                    if (item.type==="Folder"){
-                        icon = "folder";
+                    if (item.type=="Folder" || item.type=="Drive"){
+                        icon = item.type.toLowerCase();
                     }
                     else{
                         var arr = item.type.split("/");

@@ -12,25 +12,55 @@
     .sidebar {
         width: 65px;
         background-color: #777f85;
-    }
 
-    .sidebar .fas {
-        color: #fff;
-        height: 65px;
-        width: 65px;
-        text-align: center;
-        font-size: 30px;
-        line-height: 65px;
-        cursor: pointer;
-        opacity: 0.85;
-    }
+        .icon {
 
-    .sidebar .fas:hover{
-        background-color: #9aa8b1;
-    }
+            height: 65px;
+            width: 65px;
+            text-align: center;
 
-    .sidebar .selected {
-        background-color: #9aa8b1
+            line-height: 65px;
+            cursor: pointer;
+            opacity: 0.85;
+        }
+
+
+        .icon:hover {
+            background-color: #9aa8b1;
+        }
+
+        .icon:after {
+            content: "";
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900; /* fas (solid) */
+            font-size: 30px;
+            color: #fff;
+        }
+
+        .user.icon:after{
+            content: "\f0c0"; /* fa-users */
+        }
+
+        .config.icon:after{
+            content: "\f1de"; /* fa-sliders-h */
+        }
+
+        .folder.icon:after {
+            content: "\f07b";
+        }
+
+        .database.icon:after{
+            content: "\f1c0"; /* fa-database */
+        }
+
+        .media.icon:after{
+            content: "\f87c"; /* fa-photo-video */
+        }
+
+        .selected {
+            background-color: #9aa8b1
+        }
+
     }
 
 
@@ -40,11 +70,16 @@
 
     .landing-page {
         text-align: center;
+    }
+
+    .landing-page:after{
+        content: "\f085"; /* fa-cogs */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; /* fas (solid) */
         font-size: 200px;
         color: #3a3e45;
         text-shadow: -6px 3px 6px #000;
     }
-
 
 
   /**************************************************************************/

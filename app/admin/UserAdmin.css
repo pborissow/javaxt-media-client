@@ -3,7 +3,7 @@
 
 
   /**************************************************************************/
-  /** User Admin Panel
+  /** User Stats
   /**************************************************************************/
 
     .user-stats {
@@ -17,6 +17,40 @@
         fill: #636363; /* same as navbar */
     }
 
+
+
+  /**************************************************************************/
+  /** Toolbar Icons
+  /**************************************************************************/
+
+    .icon:before {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; /* fas (solid) */
+        font-style: normal;
+    }
+
+    .add.icon:before{
+        content: "\f055"; /* fa-plus-circle */
+    }
+
+    .edit.icon:before{
+        content: "\f044"; /* fa-edit */
+    }
+
+    .delete.icon:before{
+        content: "\f1f8"; /* fa-trash */
+    }
+
+    .refresh.icon:before {
+        content: "\f021"; /* fa-sync-alt */
+    }
+
+
+
+
+  /**************************************************************************/
+  /** User Status Icon
+  /**************************************************************************/
 
     .user-status {
         display: inline-block;
@@ -53,7 +87,8 @@
     }
 
 
-    .table-col .fas.fa-check {
+    .table-col .check.icon:after {
+        content: "\f00c"; /* fa-check */
         color: #238f23;
         line-height: 35px;
     }

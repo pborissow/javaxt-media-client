@@ -36,8 +36,4 @@
         background-image: url(../../images/apps/ffmpeg.svg);
     }
 
-    .app-icon.opencv:after {
-        background-image: url(../../images/apps/opencv.svg);
-    }
-
 }

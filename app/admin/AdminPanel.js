@@ -56,16 +56,15 @@ javaxt.media.webapp.AdminPanel = function(parent, config) {
 
       //Create landing page
         landingPage = createElement("div", mainPanel, "landing-page noselect");
-        landingPage.innerHTML = '<i class="fas fa-cogs"></i>';
         addShowHide(landingPage);
 
 
       //Create panels
-        createPanel("Users", "fas fa-users", javaxt.media.webapp.UserAdmin, config);
-        createPanel("Config", "fas fa-sliders-h", javaxt.media.webapp.ConfigAdmin, config);
-        createPanel("Media", "fas fa-photo-video", javaxt.media.webapp.FileAdmin, config);
-        createPanel("Files", "fas fa-folder", javaxt.media.webapp.FileAdmin, config);
-        createPanel("Database", "fas fa-database", javaxt.express.DBView, {
+        createPanel("Users", "user icon", javaxt.media.webapp.UserAdmin, config);
+        createPanel("Config", "config icon", javaxt.media.webapp.ConfigAdmin, config);
+        createPanel("Media", "media icon", javaxt.media.webapp.FileAdmin, config);
+        createPanel("Files", "folder icon", javaxt.media.webapp.FileAdmin, config);
+        createPanel("Database", "database icon", javaxt.express.DBView, {
             waitmask: waitmask,
             style:{
                 container: "db-view",

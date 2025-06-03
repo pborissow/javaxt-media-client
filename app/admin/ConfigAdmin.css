@@ -1,0 +1,80 @@
+.javaxt-media-config-admin {
+
+
+  /**************************************************************************/
+  /** Icon Styles
+  /**************************************************************************/
+
+    .icon:after {
+        content: "";
+        position: relative;
+        display: inline-block;
+        width: inherit;
+        height: inherit;
+
+        /* for font awesome icons */
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; /* fas (solid) */
+
+        /* for image icons */
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
+
+    .config.icon:after{
+        content: "\f1de"; /* fa-sliders-h */
+    }
+
+    .access.icon:after{
+        content: "\f29a"; /* fa-universal-access */
+    }
+
+    .app.icon:after{
+        content: "\f108"; /* fa-desktop */
+    }
+
+    .email.icon:after{
+        content: "\f0e0"; /* fa-envelope */
+    }
+
+    .database.icon:after{
+        content: "\f1c0"; /* fa-database */
+    }
+
+    .browser.icon:after{
+        content: "\f14e"; /* fa-compass */
+        font-weight: 400; /* far (regular) */
+    }
+
+    .model.icon:after {
+        background-image: url(../../images/apps/opencv-nofill.svg);
+        filter: invert(37%) sepia(100%) saturate(1.85) hue-rotate(154deg);
+    }
+
+
+
+  /**************************************************************************/
+  /** Icon Styles in a Config Row
+  /**************************************************************************/
+
+    .config-row .icon {
+        font-size:18px;
+        padding:0 7px;
+        color:#55839b;
+        transition: 0.4s;
+    }
+
+    .config-row .icon:after {
+        width: 20px;
+        height: 20px;
+    }
+
+    .config-row:hover .icon{
+        color:#0474ab;
+    }
+
+    .config-row:hover .model.icon:after {
+        filter: invert(37%) sepia(100%) saturate(3.5) hue-rotate(154deg);
+    }
+
+}

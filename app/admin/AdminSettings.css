@@ -41,13 +41,16 @@
         float: left;
     }
 
-    .subheader .fas {
+    .subheader .back.icon:after {
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; /* fas (solid) */
+        font-style: normal;
+        content: "\f060"; /* fa-arrow-left */
         padding: 0 5px;
     }
 
 
-    .header > div:first-child .fas,
-    .header > div:first-child .far {
+    .header > div:first-child .icon {
         display: inline-block;
         font-size: 33px;
         padding: 10px;
@@ -81,6 +84,7 @@
         border-bottom: 1px solid #383b41;
         transition: 0.2s;
         position: relative;
+        white-space: nowrap;
         cursor: pointer;
     }
 
@@ -95,26 +99,6 @@
     }
 
 
-    .config-row .fas,
-    .config-row .far {
-        font-size:18px;
-        padding:0 7px;
-        color:#55839b;
-        transition: 0.4s;
-    }
-
-
-    .config-row .fas,
-    .config-row .far {
-
-    }
-
-
-
-    .config-row-next:hover .fas,
-    .config-row-next:hover .far {
-        color:#0474ab;
-    }
 
 
     .config-row-next:hover::after {
