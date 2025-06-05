@@ -68,7 +68,13 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
   //** clear
   //**************************************************************************
     this.clear = function(){
-
+        for (var key in rows) {
+            if (rows.hasOwnProperty(key)){
+                var row = rows[key];
+                row.path.innerText = "";
+                row.button.hide();
+            }
+        }
     };
 
 
@@ -137,7 +143,15 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
     var updateRows = function(settings){
         settings.forEach((setting)=>{
             var row = rows[setting.key];
-            row.path.innerText = setting.value;
+            var value = setting.value;
+            if (value==null || typeof value === 'undefined'){
+                row.path.innerText = "";
+                row.button.hide();
+            }
+            else{
+                row.path.innerText = value;
+                row.button.show();
+            }
         });
     };
 
@@ -158,12 +172,24 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
 
 
       //Add label
-        tr.addColumn("app-label").innerText = appName;
+        tr.addColumn("label").innerText = appName;
 
 
       //Add path
-        var path = tr.addColumn("app-path");
+        var path = tr.addColumn("path");
         path.style.width = "100%";
+
+
+      //Add button
+        var button = createElement("div", tr.addColumn(), "button clear");
+        addShowHide(button);
+        button.hide();
+        button.onclick = function(e){
+            if (button.isVisible()){
+                e.stopPropagation();
+                updateConfig(appName, "");
+            }
+        };
 
 
       //Process row click events
@@ -174,7 +200,8 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
 
       //Update rows
         rows[key] = {
-            path: path
+            path: path,
+            button: button
         };
     };
 

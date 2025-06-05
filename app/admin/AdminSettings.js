@@ -248,7 +248,7 @@ javaxt.media.webapp.AdminSettings = function(parent, config) {
             },
 
             addRow: function(config){
-                var row = table.addRow("config-row config-row-next noselect");
+                var row = table.addRow("config-row arrow noselect");
 
               //Add icon
                 createElement("div", row.addColumn(), config.icon);

@@ -1,5 +1,10 @@
 .javaxt-media-settings-admin {
 
+
+  /**************************************************************************/
+  /** Header
+  /**************************************************************************/
+
     .header {
         font-size: 24px;
         color: #e0e0e2;
@@ -68,6 +73,12 @@
         border: 2px solid #2a536c;
     }
 
+
+
+  /**************************************************************************/
+  /** Config Table
+  /**************************************************************************/
+
     .config-table {
         border: 1px solid #383b41;
         border-radius: 10px;
@@ -100,8 +111,8 @@
 
 
 
-
-    .config-row-next:hover::after {
+    /** Right arrow that appears on row hover */
+    .config-row.arrow:hover::after {
         content: "";
         position: absolute;
         border-right: 2px solid #0474ab;
@@ -116,4 +127,45 @@
         transition:0.4s;
     }
 
+
+    .config-row .path {
+        color: #7f8083;
+        padding: 0 7px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+
+    .config-row .button {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        cursor: pointer;
+
+        opacity: 0;
+        transition:0.4s;
+    }
+
+    .config-row:hover .button {
+        opacity: 1;
+    }
+
+
+    .config-row .button.clear:after {
+        content: "\f057";
+        position: relative;
+        display: inline-block;
+        width: inherit;
+        height: inherit;
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900; /* fas (solid) */
+        font-size: 18px;
+        color: #974444; /* make this into a var "deep-red" */
+        transition:0.2s;
+    }
+
+    .config-row .button.clear:hover:after{
+        color: #d75555; /* make this into a var "deep-red" */
+    }
 }

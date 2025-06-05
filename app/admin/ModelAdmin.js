@@ -68,7 +68,13 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
   //** clear
   //**************************************************************************
     this.clear = function(){
-
+        for (var key in rows) {
+            if (rows.hasOwnProperty(key)){
+                var row = rows[key];
+                row.path.innerText = "";
+                row.button.hide();
+            }
+        }
     };
 
 
@@ -79,7 +85,7 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
         me.clear();
         waitmask.show(500);
         get("settings?fields=key,value&format=json&key=" +
-            config.apps.join(",").toLowerCase().replace(" ","_"), {
+            config.apps.map(appName => getKey(appName)).join(","), {
             success: function(text){
                 var settings = JSON.parse(text);
                 updateRows(settings);
@@ -113,12 +119,12 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
   //**************************************************************************
   //** updateConfig
   //**************************************************************************
-    var updateConfig = function(key, path, callback){
+    var updateConfig = function(appName, path, callback){
 
         waitmask.show(500);
-        save("setting?key=" + key.toLowerCase().replace(" ","_"), path, {
+        save("setting?key=" + getKey(appName), path, {
             success: function(){
-                if (callback) callback.apply(me, [key, path]);
+                if (callback) callback.apply(me, [appName, path]);
                 me.update();
             },
             failure: function(request){
@@ -137,7 +143,15 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
     var updateRows = function(settings){
         settings.forEach((setting)=>{
             var row = rows[setting.key];
-            row.path.innerText = setting.value;
+            var value = setting.value;
+            if (value==null || typeof value === 'undefined'){
+                row.path.innerText = "";
+                row.button.hide();
+            }
+            else{
+                row.path.innerText = value;
+                row.button.show();
+            }
         });
     };
 
@@ -146,7 +160,7 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
   //** addRow
   //**************************************************************************
     var addRow = function(table, appName){
-        var key = appName.toLowerCase().replace(" ","_");
+        var key = getKey(appName);
 
 
       //Create new row
@@ -158,12 +172,24 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
 
 
       //Add label
-        tr.addColumn("app-label").innerText = appName;
+        tr.addColumn("label").innerText = appName;
 
 
       //Add path
-        var path = tr.addColumn("app-path");
+        var path = tr.addColumn("path");
         path.style.width = "100%";
+
+
+      //Add button
+        var button = createElement("div", tr.addColumn(), "button clear");
+        addShowHide(button);
+        button.hide();
+        button.onclick = function(e){
+            if (button.isVisible()){
+                e.stopPropagation();
+                updateConfig(appName, "");
+            }
+        };
 
 
       //Process row click events
@@ -174,7 +200,8 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
 
       //Update rows
         rows[key] = {
-            path: path
+            path: path,
+            button: button
         };
     };
 
@@ -236,6 +263,14 @@ javaxt.media.webapp.ModelAdmin = function(parent, config) {
         fileBrowser.setDirectory(path);
         fileBrowser.setTitle(appName);
         fileBrowser.open();
+    };
+
+
+  //**************************************************************************
+  //** getKey
+  //**************************************************************************
+    var getKey = function(appName){
+        return appName.toLowerCase().replace(" ","_");
     };
 
 
