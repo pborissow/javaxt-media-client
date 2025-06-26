@@ -3,7 +3,7 @@
   /**************************************************************************/
   /** Local CSS Variables
   /**************************************************************************/
-    --icon-size: 18px;
+    --icon-size: 20px;
     --icon-color: #8e8f92;
     --icon-hover: #d2d2d2;
     --icon-selected: #d2d2d2;
@@ -207,10 +207,10 @@
 
 
         .menu-item:before {
-            font-size: var(--icon-size);
+            font-size: 18px;
             color: var(--icon-color);
         }
-        
+
         .menu-item.delete:before{
             content: "\f00d"; /* times */
         }
@@ -286,7 +286,7 @@
         .play-button {
           height: var(--icon-size);
           width: var(--icon-size);
-          display: block;
+          display: inline-block;
           overflow: hidden;
           position: relative;
           cursor: pointer;
@@ -333,8 +333,8 @@
           width: 0;
           height: 0;
           border-right: var(--icon-size) solid var(--background-color);
-          border-top: 9px solid transparent;
-          border-bottom: 9px solid transparent;
+          border-top: calc(var(--icon-size) / 2) solid transparent;
+          border-bottom: calc(var(--icon-size) / 2) solid transparent;
           -webkit-transition: -webkit-transform 0.25s ease;
           transition: -webkit-transform 0.25s ease;
           transition: transform 0.25s ease;
@@ -353,6 +353,30 @@
         .pause .play-bottom {
           -webkit-transform: translate(0, 50%);
                   transform: translate(0, 50%);
+        }
+
+    }
+
+
+  /**************************************************************************/
+  /** Video JS
+  /**************************************************************************/
+  /** Overrides video.js styles
+  */
+    .video-js {
+
+        font-family: inherit;
+        font-size: 13px;
+
+        .vjs-button > .vjs-icon-placeholder:before {
+
+            font-size: 28px;
+            line-height: 42px;
+            color: #bbbdc3;
+        }
+
+        .vjs-button > .vjs-icon-placeholder:hover:before{
+            color: #fff;
         }
 
     }

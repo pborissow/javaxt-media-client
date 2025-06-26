@@ -62,6 +62,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         var mainDiv = createElement("div", parent, {
             width: "100%",
             height: "100%",
+            overflow: "hidden",
             position: "absolute",
             top: 0,
             left: 0
@@ -84,6 +85,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         closeButton.onclick = function(){
             stopSlideshow();
             button["play"].pause();
+            if (videojs.players) {
+                Object.values(videojs.players).forEach((player)=>{
+                    player.pause();
+                    player.dispose();
+                });
+            }
             me.hide();
             exitFullScreen();
         };
@@ -271,6 +278,15 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         carousel.beforeChange = function(currPanel, nextPanel, direction){
             sliding = true;
 
+
+          //Pause all video players
+            if (videojs.players) {
+                Object.values(videojs.players).forEach((player)=>{
+                    player.pause();
+                });
+            }
+
+
           //Update opacity if the slideshow is playing
             if (timer){
                 if (button["face"].isSelected()) button["face"].click();
@@ -360,19 +376,22 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
       //Watch for onChange events
         carousel.onChange = function(currPanel, prevPanel){
+
+            var hideOverlay = function(){
+                var overlay = getOverlay();
+                if (overlay) overlay.show();
+                sliding = false;
+            };
+
             if (timer){
                 fx.fadeIn(currPanel, "easeIn", 1000, ()=>{
                     prevPanel.style.opacity = "";
-                    var overlay = getOverlay();
-                    if (overlay) overlay.show();
-                    sliding = false;
+                    hideOverlay();
                 });
             }
             else{
                 currPanel.style.opacity = "";
-                var overlay = getOverlay();
-                if (overlay) overlay.show();
-                sliding = false;
+                hideOverlay();
             }
         };
 
@@ -470,6 +489,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                     if (button["face"].isSelected()) showFaces();
 
                     this.parentNode.removeChild(this);
+
+                    if (mediaItem.type=="video"){
+                        var videoPlayer = createVideoPlayer();
+                        videoPlayer.poster(this.src);
+                        videoPlayer.src({type: 'video/mp4', src: '/video?id=' + mediaItem.id});
+                    }
                 };
 
                 img.onerror = function(){
@@ -522,6 +547,13 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             if (isSelected) console.log("Like!");
             else console.log("no like...");
         });
+
+
+      //Set widths
+        var numButtons = tr.childNodes.length;
+        for (var i=0; i<numButtons; i++){
+            tr.childNodes[i].style.width = ((100/numButtons))+"%";
+        }
 
     };
 
@@ -596,6 +628,34 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
 
   //**************************************************************************
+  //** createVideoPlayer
+  //**************************************************************************
+    var createVideoPlayer = function(){
+
+        var v = getOverlay("video-js");
+        if (v){
+            var p = v.parentNode;
+            p.removeChild(v);
+        }
+
+        v = createElement("video", visibleDiv, {
+            width: "100%",
+            height: "100%",
+            position: "relative"
+        });
+
+        v.className = "video-js";
+
+        return videojs(v, {
+            controls: true,
+            autoplay: false,
+            preload: 'auto'
+        });
+
+    };
+
+
+  //**************************************************************************
   //** createOverlay
   //**************************************************************************
     var createOverlay = function(){
@@ -622,9 +682,13 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //**************************************************************************
   //** getOverlay
   //**************************************************************************
-    var getOverlay = function(){
-        if (visibleDiv && visibleDiv.childNodes.length>0){
-            return visibleDiv.childNodes[0];
+    var getOverlay = function(className){
+        if (visibleDiv){
+            if (!className) className = "overlay";
+            for (var i=0; i<visibleDiv.childNodes.length; i++){
+                var el = visibleDiv.childNodes[i];
+                if (el.className.indexOf(className)>-1) return el;
+            }
         }
         return null;
     };
