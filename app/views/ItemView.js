@@ -42,6 +42,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var visibleDiv;
 
   //Slideshow related variables
+    var isFullScreen = false;
     var timer;
     var fx;
 
@@ -83,16 +84,17 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         });
         closeButton.className = "close-button";
         closeButton.onclick = function(){
-            stopSlideshow();
-            button["play"].pause();
+            if (button["play"].isSelected()) button["play"].click();
             if (videojs.players) {
                 Object.values(videojs.players).forEach((player)=>{
-                    player.pause();
-                    player.dispose();
+                    if (player){
+                        player.pause();
+                        player.dispose();
+                    }
                 });
             }
             me.hide();
-            exitFullScreen();
+            if (isFullScreen) exitFullScreen();
         };
 
 
@@ -113,6 +115,10 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             if (!me.isVisible()) return;
             if (e.keyCode==39) carousel.next();
             else if (e.keyCode==37) carousel.back();
+            else if (e.keyCode==27){ //escape
+                //console.log("stop!");
+                //if (isFullScreen) closeButton.click();
+            }
         });
 
 
@@ -282,14 +288,14 @@ javaxt.media.webapp.ItemView = function (parent, config) {
           //Pause all video players
             if (videojs.players) {
                 Object.values(videojs.players).forEach((player)=>{
-                    player.pause();
+                    if (player) player.pause();
                 });
             }
 
 
           //Update opacity if the slideshow is playing
             if (timer){
-                if (button["face"].isSelected()) button["face"].click();
+                //if (button["face"].isSelected()) button["face"].click();
                 nextPanel.style.opacity = 0;
                 fx.fadeOut(currPanel, "ease", 500, function(){
                     this.style.display = "";
@@ -455,7 +461,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
 
         carousel.onResize = function(){
-
+console.log("onResize!");
             resizeFaces();
 
         };
@@ -522,7 +528,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
 
       //Add play/pause button
-        button["play"] = createPlayButton(tr.addColumn(), (isSelected)=>{
+        button["play"] = createButton("slideshow button", tr.addColumn(), (isSelected)=>{
             if (isSelected) startSlideshow();
             else stopSlideshow();
         });
@@ -638,20 +644,56 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             p.removeChild(v);
         }
 
-        v = createElement("video", visibleDiv, {
-            width: "100%",
-            height: "100%",
-            position: "relative"
-        });
+      //Get dimensions of the overlay. We'll use the same dimensions for the
+      //video player.
+        var overlay = getOverlay();
+        var hideOverlay = false;
+        if (overlay){
+            hideOverlay = !overlay.isVisible();
+        }
+        else{
+            overlay = createOverlay();
+            hideOverlay = true;
+        }
 
+
+      //Create video element
+        v = createElement("video", visibleDiv, {
+            width: overlay.style.width,
+            height: overlay.style.height,
+            left: overlay.style.left,
+            top: overlay.style.top,
+            position: "absolute"
+        });
         v.className = "video-js";
 
-        return videojs(v, {
+
+
+      //Create video player
+        var videoPlayer = videojs(v, {
             controls: true,
             autoplay: false,
             preload: 'auto'
         });
+        videoPlayer.on('play', function(){
+            if (button["play"].isSelected()) button["play"].click();
+            if (button["face"].isSelected()) button["face"].click();
+        });
 
+
+      //The video player creates a div around the video element, copying all
+      //the style elements of the video elements.
+        onRender(v, function(){
+            v.style.top = 0;
+            v.style.left = 0;
+        });
+
+
+      //Hide overlay as needed
+        if (hideOverlay) overlay.hide();
+
+
+        return videoPlayer;
     };
 
 
@@ -664,16 +706,19 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         if (overlay) return overlay;
 
 
-        var rect = javaxt.dhtml.utils.getRect(visibleDiv);
-        overlay = createElement("div", visibleDiv, {
-            position: "absolute",
-            width: width+"px",
-            height: height+"px",
-            left: (rect.width-width)/2 + "px",
-            top: (rect.height-height)/2 + "px"
-            //border: "1px solid red"
-        });
-        overlay.className = "overlay";
+        overlay = createElement("div", visibleDiv, "overlay");
+        overlay.style.position = "absolute";
+        overlay.style.zIndex = 2;
+        overlay.resize = function(){
+            console.log("overlay.resize", this.parentNode);
+
+            var rect = javaxt.dhtml.utils.getRect(this.parentNode);
+            this.style.width = width+"px";
+            this.style.height = height+"px";
+            this.style.left = (rect.width-width)/2 + "px";
+            this.style.top = (rect.height-height)/2 + "px";
+        };
+        overlay.resize();
         addShowHide(overlay);
         return overlay;
     };
@@ -700,7 +745,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var showFaces = function(){
 
         var overlay = getOverlay();
-        if (overlay){
+        if (overlay && overlay.childNodes.length>0){
             resizeFaces(true);
             overlay.show();
             return;
@@ -827,6 +872,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         var overlay = getOverlay();
         if (overlay){
             if (forceResize===true || overlay.isVisible()){
+                overlay.resize();
                 var rect = javaxt.dhtml.utils.getRect(visibleDiv);
                 overlay.style.left = (rect.width-width)/2 + "px";
                 overlay.style.top = (rect.height-height)/2 + "px";
@@ -973,8 +1019,9 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             elem.webkitRequestFullscreen();
         }
         else if (elem.msRequestFullscreen) { /* IE11 */
-          elem.msRequestFullscreen();
+            elem.msRequestFullscreen();
         }
+        isFullScreen = true;
 
 
       //Update carousel after resize (just in case)
@@ -1001,6 +1048,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
   //** exitFullScreen
   //**************************************************************************
     var exitFullScreen = function(){
+        isFullScreen = false;
         if (document.exitFullscreen) {
             document.exitFullscreen();
         }
@@ -1021,6 +1069,7 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var createElement = javaxt.dhtml.utils.createElement;
     var addShowHide = javaxt.dhtml.utils.addShowHide;
     var createTable = javaxt.dhtml.utils.createTable;
+    var onRender = javaxt.dhtml.utils.onRender;
     var merge = javaxt.dhtml.utils.merge;
     var del = javaxt.dhtml.utils.delete;
     var get = javaxt.dhtml.utils.get;

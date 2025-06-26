@@ -278,11 +278,20 @@
             content: "\f02e";
         }
 
+        .slideshow.button:before{
+            content: "\f26c";
+            font-weight: 900;
+        }
+
+        .slideshow.button.selected:before{
+            content: "\f28b";
+            font-weight: 900;
+        }
 
         /**************************************************************************/
         /** Play/Pause Button (Footer Button)
         /**************************************************************************/
-
+        /*
         .play-button {
           height: var(--icon-size);
           width: var(--icon-size);
@@ -354,6 +363,7 @@
           -webkit-transform: translate(0, 50%);
                   transform: translate(0, 50%);
         }
+        */
 
     }
 
@@ -378,6 +388,15 @@
         .vjs-button > .vjs-icon-placeholder:hover:before{
             color: #fff;
         }
+
+        .vjs-big-play-button{
+            z-index: 5;
+        }
+
+        .vjs-poster{
+            opacity: 0;
+        }
+
 
     }
 }
