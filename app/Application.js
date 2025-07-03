@@ -68,6 +68,7 @@ javaxt.media.webapp.Application = function(parent, config) {
             position: "relative"
         });
         mainDiv.className = "javaxt-media-server";
+        me.el = mainDiv;
 
 
       //Instantiate main app (component with horizontal tabs)
@@ -78,58 +79,25 @@ javaxt.media.webapp.Application = function(parent, config) {
             useBrowserHistory: true
         });
 
-
-
-        var fakeUser = {
-            id: 1,
-            username: 'admin',
-            accessLevel: 5
-        };
-
-        fakeUser.preferences = new javaxt.express.UserPreferences(()=>{
-            fakeUser.preferences.set("AutoReload", true, true);
-            updateUser(fakeUser);
-        });
-
-
-
-
-    /*
-      //Identify current user and load view
-        get("whoami", {
-            success: function(username){
-
-                get("user", {
-                    success: function(user){
-                        updateUser(JSON.parse(user));
-                    },
-                    failure: function(request){
-                        updateUser(null);
-                    }
-                });
-
-
-            },
-            failure: function(request){
-                if (request.status==400){
-                    //no problem, user not logged in
-                }
-                updateUser(null);
-            }
-        });
-
-    */
-
-
-        me.el = mainDiv;
     };
 
+
+  //**************************************************************************
+  //** update
+  //**************************************************************************
+    this.update = function(user){
+        updateUser(user);
+    };
 
 
   //**************************************************************************
   //** updateUser
   //**************************************************************************
     var updateUser = function(user){
+
+      //Update accessLevel for admin user. This is a hack! Also, we need to
+      //audit and remove accessLevel throughout the app. Use
+        if (user && user.id===-1) user.accessLevel = 5;
 
 
       //Define tabs to render

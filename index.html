@@ -10,29 +10,88 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
+<script src="lib/javaxt/javaxt-webcontrols.js"></script>
+<script src="lib/javaxt/javaxt-express.js"></script>
 
-<!-- Add 3rd party libs -->
-<script src="lib/*.js"></script>
-<link href="lib/*.css" rel="stylesheet" />
-
-
-<!-- Add specific js and css files to override ordering of the wildcard includes -->
 <link href="lib/javaxt/javaxt-dark-theme.css" rel="stylesheet" />
 <link href="lib/javaxt/javaxt-express-dark.css" rel="stylesheet" />
 
-
-<!-- Add this application -->
-<script src="app/*.js"></script>
-<link href="app/*.css" rel="stylesheet" />
-
+<link href="style/landing.css" rel="stylesheet" />
 
 </head>
 <body>
 <script>
-    window.onload = function() {
-        javaxt.dhtml.utils.updateDOM();
-        new javaxt.media.webapp.Application(document.body);
+
+window.onload = function() {
+
+    javaxt.dhtml.utils.updateDOM();
+
+
+  //Create waitmask as needed
+    var waitmask = document.waitmask;
+    if (!waitmask) waitmask = document.waitmask = new javaxt.express.WaitMask(document.body);
+    else{
+        var parent = waitmask.el.parentNode;
+        if (!parent) document.body.appendChild(waitmask.el);
+    }
+
+
+
+  //Instantiate page loader
+    var pageLoader = new javaxt.dhtml.PageLoader();
+    var loadPage = function(url){
+        pageLoader.loadPage(url,
+            function(){
+                waitmask.hide();
+            },
+            onFailure
+        );
     };
+
+
+
+  //Error handler
+    var onFailure = function(request){
+        var status = request.status;
+        if (status==400 || status==401 || status==403){
+            loadPage("login.html");
+        }
+        else{
+            waitmask.hide();
+            //_error.removeAttr("style").show();
+            console.log("Communication Failure. Server might be down or unresponsive. Please contact your system administrator.");
+            loadPage("login.html");
+        }
+    };
+
+
+
+  //Login or redirect user
+    waitmask.show();
+    javaxt.dhtml.utils.get("whoami", {
+        success: function(id, xml, url, request){
+            request.abort();
+            request = null;
+
+            javaxt.dhtml.utils.get("user?id="+id, {
+                success: function(text, xml, url, request){
+                    var user = JSON.parse(text);
+                    request.abort();
+                    request = null;
+
+                    document.user = user;
+                    var url = "main.html";
+                    loadPage(url);
+                },
+                failure: onFailure
+            });
+
+        },
+        failure: onFailure
+    });
+
+};
+
 </script>
 </body>
 </html>
