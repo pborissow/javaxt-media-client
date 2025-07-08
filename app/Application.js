@@ -86,6 +86,7 @@ javaxt.media.webapp.Application = function(parent, config) {
   //** update
   //**************************************************************************
     this.update = function(user){
+        config.user = user;
         updateUser(user);
     };
 
@@ -94,10 +95,37 @@ javaxt.media.webapp.Application = function(parent, config) {
   //** updateUser
   //**************************************************************************
     var updateUser = function(user){
+        get("UserAccesses?format=json&fields=componentID,level&userID="+user.id, {
+            success: function(text){
+                var components = JSON.parse(text);
+                var componentIDs = components.map(item => item.componentID);
+                get("Components?format=json&fields=id,key&id="+componentIDs, {
+                    success: function(text){
+                        var arr = JSON.parse(text);
+                        var map = {};
+                        components.forEach((component)=>{
+                            var id = component.componentID;
+                            for (var i=0; i<arr.length; i++){
+                                if (arr[i].id===id){
+                                    map[arr[i].key] = component.level;
+                                    break;
+                                }
+                            }
+                        });
+                        user.accessLevel = map;
+                        updateApp(user);
+                    }
+                });
 
-      //Update accessLevel for admin user. This is a hack! Also, we need to
-      //audit and remove accessLevel throughout the app. Use
-        if (user && user.id===-1) user.accessLevel = 5;
+            }
+        });
+    };
+
+
+  //**************************************************************************
+  //** updateUser
+  //**************************************************************************
+    var updateApp = function(user){
 
 
       //Define tabs to render
@@ -112,8 +140,12 @@ javaxt.media.webapp.Application = function(parent, config) {
         });
 
         if (config.standAlone===true){
-            if (user && user.accessLevel===5){
-                tabs.push({name: "Admin", class: javaxt.media.webapp.AdminPanel});
+            var addAdmin = false;
+            Object.keys(user.accessLevel).forEach((key)=>{
+                if (key.indexOf("Admin")>-1) addAdmin = true;
+            });
+            if (addAdmin){
+                tabs.push({name: "Admin", class: javaxt.media.webapp.AdminPanel, config: config});
             }
         }
 
@@ -126,7 +158,7 @@ javaxt.media.webapp.Application = function(parent, config) {
 
 
       //Update the app
-        app.update(user ? user : {}, tabs);
+        app.update(user, tabs);
 
 
 
