@@ -99,6 +99,32 @@ javaxt.media.webapp.AdminPanel = function(parent, config) {
   //**************************************************************************
     this.update = function(){
 
+        var accessLevel = config.user.accessLevel;
+        for (var key in panel) {
+            var p = panel[key];
+
+
+            var securityKey;
+            if (key=="Users"){
+                securityKey = "UserAdmin";
+            }
+            else if (key=="Media"){
+                securityKey = "Media";
+            }
+            else{
+                securityKey = "SysAdmin";
+            }
+
+
+            if (accessLevel[securityKey]==5){
+                p.button.show();
+            }
+            else{
+                p.button.hide();
+                p.body.hide();
+            }
+
+        }
     };
 
 
@@ -147,6 +173,8 @@ javaxt.media.webapp.AdminPanel = function(parent, config) {
         button.onclick = function(){
             me.raisePanel(name);
         };
+        addShowHide(button);
+        button.hide();
 
         var body = createElement("div", {
             height: "100%"
