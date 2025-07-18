@@ -122,7 +122,7 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
     var updateConfig = function(key, path, callback){
 
         waitmask.show(500);
-        save("setting?key=" + key.toLowerCase(), path, {
+        save("setting/" + key, path, {
             success: function(){
                 if (callback) callback.apply(me, [key, path]);
                 me.update();
@@ -251,12 +251,17 @@ javaxt.media.webapp.AppAdmin = function(parent, config) {
             var selectButton = fileBrowser.buttons["Select"];
             selectButton.disabled = true;
             selectButton.onclick = function(){
+                if (config.user) config.user.preferences.set("fileBrowser.path", this.path);
                 updateConfig(fileBrowser.appName, this.path, fileBrowser.close);
             };
 
             fileBrowser.buttons["Cancel"].onclick = ()=>{
                 fileBrowser.close();
             };
+        }
+
+        if (!path && config.user){
+            path = config.user.preferences.get("fileBrowser.path");
         }
 
         fileBrowser.appName = appName;
