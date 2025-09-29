@@ -41,6 +41,9 @@ javaxt.media.webapp.ItemView = function (parent, config) {
     var width, height;
     var visibleDiv;
 
+  //Variables used to help resize images
+    var thumbnails = [];
+
   //Slideshow related variables
     var isFullScreen = false;
     var timer;
@@ -153,7 +156,6 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         me.clear();
 
 
-
       //Update visible panel when the carousel is ready
         var div = carousel.getVisiblePanel();
         if (!div){
@@ -177,40 +179,31 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         }
 
 
-
-
-
+      //Update filter
         var isDirty = retriever.setFilter(filter);
-        if (isDirty){ //Fetch siblings
-            mediaItems = [];
-            currItem = 0;
+        if (isDirty) mediaItems = [];
+
+
+      //Fetch mediaItems as needed and update the view
+        if (isDirty || retriever.getPage()<page){
             numItems = -1;
 
             var fetchItems = function(){
                 retriever.fetch({
                     success: function(items){
 
+                      //Update mediaItems
                         items.forEach((mediaItem)=>{
-                            if (!mediaItem.isFolder){
-                                mediaItems.push(mediaItem);
-                                if (mediaItem.id==item.id){
-                                    currItem = mediaItems.length-1;
-                                }
-                            }
+                            if (!mediaItem.isFolder) mediaItems.push(mediaItem);
                         });
 
+
+                      //Fetch more items as needed or update the view
                         if (retriever.getPage()<page){
                             fetchItems();
                         }
                         else{
-                            if (mediaItems.length>1){
-                                footer.show();
-                                carousel.showNav();
-                            }
-                            else{
-                                footer.hide();
-                                carousel.hideNav();
-                            }
+                            updateView(item);
                         }
                     }
                 });
@@ -218,24 +211,38 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             };
             fetchItems();
         }
-        else{ //Update currItem
-            for (var i=0; i<mediaItems.length; i++){
-                var mediaItem = mediaItems[i];
-                if (mediaItem.id==item.id){
-                    currItem = i;
-                    break;
-                }
-            }
-            if (mediaItems.length>1){
-                footer.show();
-                carousel.showNav();
-            }
-            else{
-                footer.hide();
-                carousel.hideNav();
+        else{
+            updateView(item);
+        }
+    };
+
+
+  //**************************************************************************
+  //** updateView
+  //**************************************************************************
+  /** Used to find an item in mediaItems and update the view
+   */
+    var updateView = function(item){
+
+      //Find item
+        currItem = 0;
+        for (var i=0; i<mediaItems.length; i++){
+            var mediaItem = mediaItems[i];
+            if (mediaItem.id==item.id){
+                currItem = i;
+                break;
             }
         }
 
+      //Update the view
+        if (mediaItems.length>1){
+            footer.show();
+            carousel.showNav();
+        }
+        else{
+            footer.hide();
+            carousel.hideNav();
+        }
     };
 
 
@@ -460,10 +467,12 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         };
 
 
+        var resizeTimeout;
         carousel.onResize = function(){
-console.log("onResize!");
-            resizeFaces();
-
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function(){
+                resizePanel();
+            }, 100);
         };
     };
 
@@ -477,45 +486,115 @@ console.log("onResize!");
         visibleDiv.innerHTML = "";
         visibleDiv.style.backgroundImage = "none";
 
+        mediaItem = {};
+        thumbnails = [];
 
         get("/MediaItem?id=" + item.id, {
             success: function(text){
                 mediaItem = JSON.parse(text);
 
-                var img = createElement("img", parent, {
-                    display: "none"
-                });
+                get("/Thumbnails?id=" + item.id, {
+                    success: function(text){
+                        JSON.parse(text).forEach((entry)=>{
+                            var arr = entry.split('x');
+                            thumbnails.push([parseInt(arr[0]), parseInt(arr[1])]);
+                        });
 
-
-                img.onload = function(){
-                    visibleDiv.style.backgroundImage = "url(\"" +  this.src + "\")";
-                    width = this.width;
-                    height = this.height;
-
-                    if (button["face"].isSelected()) showFaces();
-
-                    this.parentNode.removeChild(this);
-
-                    if (mediaItem.type=="video"){
-                        var videoPlayer = createVideoPlayer();
-                        videoPlayer.poster(this.src);
-                        videoPlayer.src({type: 'video/mp4', src: '/video?id=' + mediaItem.id});
+                        var rect = javaxt.dhtml.utils.getRect(carousel.el);
+                        updateImage(rect.width, rect.height);
                     }
-                };
-
-                img.onerror = function(){
-                    visibleDiv.className += " not-available";
-                    parent.removeChild(this);
-                };
-
-
-                var rect = javaxt.dhtml.utils.getRect(carousel.el);
-                img.src = "image?width=" + rect.width + "&id=" + item.id;
-
+                });
             }
         });
     };
 
+
+  //**************************************************************************
+  //** resizePanel
+  //**************************************************************************
+    var resizePanel = function(){
+        if (width && thumbnails){
+
+            var rect = javaxt.dhtml.utils.getRect(carousel.el);
+            var panelWidth = rect.width;
+            var panelHeight = rect.height;
+            var optimalWidth;
+
+            // Calculate the aspect ratio of the current image
+            var aspectRatio = width / height;
+            var isVertical = aspectRatio < 1;
+
+            for (var i=0; i<thumbnails.length; i++){
+                var thumbnail = thumbnails[i];
+                var w = thumbnail[0];
+                var h = thumbnail[1];
+
+                if (isVertical) {
+                    // For vertical images, check if thumbnail fits within panel height
+                    if (h <= panelHeight) {
+                        optimalWidth = w;
+                        break;
+                    }
+                } else {
+                    // For horizontal images, check if thumbnail fits within panel width
+                    if (w <= panelWidth) {
+                        optimalWidth = w;
+                        break;
+                    }
+                }
+            }
+
+
+            if (optimalWidth != width) {
+                console.log("width: " + width + "->" + optimalWidth);
+                updateImage(optimalWidth);
+            }
+        }
+
+        resizeFaces();
+    };
+
+
+  //**************************************************************************
+  //** updateImage
+  //**************************************************************************
+    var updateImage = function(w, h){
+
+        var img = createElement("img", parent, {
+            display: "none"
+        });
+
+
+        img.onload = function(){
+            visibleDiv.style.backgroundImage = "url(\"" +  this.src + "\")";
+            width = this.width;
+            height = this.height;
+
+            var rect = javaxt.dhtml.utils.getRect(carousel.el);
+            //if (width>rect.width || height>rect.height) visibleDiv.style.backgroundSize = "contain";
+            //else visibleDiv.style.backgroundSize = "";
+
+
+            if (button["face"].isSelected()) showFaces();
+
+            this.parentNode.removeChild(this);
+
+            if (mediaItem.type=="video"){
+                var videoPlayer = createVideoPlayer();
+                videoPlayer.poster(this.src);
+                videoPlayer.src({type: 'video/mp4', src: '/video?id=' + mediaItem.id});
+            }
+        };
+
+
+        img.onerror = function(){
+            visibleDiv.className += " not-available";
+            parent.removeChild(this);
+        };
+
+
+        img.src = "image?width=" + w + "&id=" + mediaItem.id;
+    };
 
 
   //**************************************************************************
