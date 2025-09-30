@@ -789,8 +789,6 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         overlay.style.position = "absolute";
         overlay.style.zIndex = 2;
         overlay.resize = function(){
-            console.log("overlay.resize", this.parentNode);
-
             var rect = javaxt.dhtml.utils.getRect(this.parentNode);
             this.style.width = width+"px";
             this.style.height = height+"px";
@@ -846,31 +844,13 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
 
               //Compute scaling
-                var w, h;
-                var orientation = mediaItem.info.orientation;
-                if (!orientation) orientation = 1;
-                //console.log(orientation);
-                if (orientation<5){
-                    w = width/mediaItem.info.width;
-                    h = height/mediaItem.info.height;
-                }
-                else{
-                    w = width/mediaItem.info.height;
-                    h = height/mediaItem.info.width;
-
-                  //Hack for incorrect orientation (e.g. image was rotated
-                  //but the orientation flag wasn't updated)
-                    if (mediaItem.info.width<mediaItem.info.height){
-                        w = width/mediaItem.info.width;
-                        h = height/mediaItem.info.height;
-                    }
-                }
+                var sf = getScaleFactor();
+                var w = sf[0];
+                var h = sf[1];
 
 
               //Add rectangles
                 mediaItem.faces.forEach((face)=>{
-                    var rect = face.coordinates.rect;
-
 
                     /* TODO: Rotate rectangle?
                     case 1: return; //"Top, left side (Horizontal / normal)"
@@ -884,14 +864,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
                     */
 
 
-                    var box = createElement("div", overlay, {
-                        position: "absolute",
-                        width: rect.w*w + "px",
-                        height: rect.h*h + "px",
-                        left: rect.x*w + "px",
-                        top: rect.y*h + "px"
-                    });
-                    box.className = "face";
+                    var box = createElement("div", overlay, "face");
+                    box.style.position = "absolute";
                     box.face = face;
 
                     box.onclick = function(e){
@@ -926,6 +900,15 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
                     };
 
+                    box.update = function(w, h){
+                        var rect = this.face.coordinates.rect;
+                        this.style.width = rect.w*w + "px";
+                        this.style.height = rect.h*h + "px";
+                        this.style.left = rect.x*w + "px";
+                        this.style.top = rect.y*h + "px";
+                    };
+
+                    box.update(w, h);
                 });
 
                 if (!sliding) overlay.show();
@@ -952,9 +935,19 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         if (overlay){
             if (forceResize===true || overlay.isVisible()){
                 overlay.resize();
+
                 var rect = javaxt.dhtml.utils.getRect(visibleDiv);
                 overlay.style.left = (rect.width-width)/2 + "px";
                 overlay.style.top = (rect.height-height)/2 + "px";
+                if (overlay.childNodes.length < 1) return;
+
+                var sf = getScaleFactor();
+                var w = sf[0];
+                var h = sf[1];
+                for (var i=0; i<overlay.childNodes.length; i++){
+                    var box = overlay.childNodes[i];
+                    box.update(w, h);
+                }
             }
         }
     };
@@ -1139,6 +1132,33 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         }
 
         setTimeout(carousel.resize, 800);
+    };
+
+
+  //**************************************************************************
+  //** getScaleFactor
+  //**************************************************************************
+    var getScaleFactor = function(){
+        var w, h;
+        var orientation = mediaItem.info.orientation;
+        if (!orientation) orientation = 1;
+        //console.log(orientation);
+        if (orientation<5){
+            w = width/mediaItem.info.width;
+            h = height/mediaItem.info.height;
+        }
+        else{
+            w = width/mediaItem.info.height;
+            h = height/mediaItem.info.width;
+
+          //Hack for incorrect orientation (e.g. image was rotated
+          //but the orientation flag wasn't updated)
+            if (mediaItem.info.width<mediaItem.info.height){
+                w = width/mediaItem.info.width;
+                h = height/mediaItem.info.height;
+            }
+        }
+        return [w,h];
     };
 
 
