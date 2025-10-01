@@ -38,11 +38,10 @@ javaxt.media.webapp.ItemView = function (parent, config) {
 
   //Current/visible item
     var mediaItem = null;
-    var width, height;
-    var visibleDiv;
-
-  //Variables used to help resize images
     var thumbnails = [];
+    var width, height;
+    var displayWidth, displayHeight;
+    var visibleDiv;
 
   //Slideshow related variables
     var isFullScreen = false;
@@ -569,10 +568,26 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             visibleDiv.style.backgroundImage = "url(\"" +  this.src + "\")";
             width = this.width;
             height = this.height;
+            displayWidth = width;
+            displayHeight = height;
 
+
+          //If image is larger than container, calculate actual display
+          //dimensions and update "background-size" style.
             var rect = javaxt.dhtml.utils.getRect(carousel.el);
-            //if (width>rect.width || height>rect.height) visibleDiv.style.backgroundSize = "contain";
-            //else visibleDiv.style.backgroundSize = "";
+            if (width > rect.width || height > rect.height) {
+                var scaleX = rect.width / width;
+                var scaleY = rect.height / height;
+                var scale = Math.min(scaleX, scaleY); // Use the smaller scale to fit
+
+                displayWidth = width * scale;
+                displayHeight = height * scale;
+
+                visibleDiv.style.backgroundSize = "contain";
+            }
+            else {
+                visibleDiv.style.backgroundSize = "";
+            }
 
 
             if (button["face"].isSelected()) showFaces();
@@ -792,8 +807,8 @@ javaxt.media.webapp.ItemView = function (parent, config) {
             var rect = javaxt.dhtml.utils.getRect(this.parentNode);
             this.style.width = width+"px";
             this.style.height = height+"px";
-            this.style.left = (rect.width-width)/2 + "px";
-            this.style.top = (rect.height-height)/2 + "px";
+            this.style.left = (rect.width-displayWidth)/2 + "px";
+            this.style.top = (rect.height-displayHeight)/2 + "px";
         };
         overlay.resize();
         addShowHide(overlay);
@@ -934,19 +949,17 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         var overlay = getOverlay();
         if (overlay){
             if (forceResize===true || overlay.isVisible()){
+
+              //Update overlay
                 overlay.resize();
 
-                var rect = javaxt.dhtml.utils.getRect(visibleDiv);
-                overlay.style.left = (rect.width-width)/2 + "px";
-                overlay.style.top = (rect.height-height)/2 + "px";
-                if (overlay.childNodes.length < 1) return;
 
-                var sf = getScaleFactor();
-                var w = sf[0];
-                var h = sf[1];
+              //Update faces
+                var sf;
                 for (var i=0; i<overlay.childNodes.length; i++){
                     var box = overlay.childNodes[i];
-                    box.update(w, h);
+                    if (!sf) sf = getScaleFactor();
+                    box.update(sf[0], sf[1]);
                 }
             }
         }
@@ -1142,20 +1155,20 @@ javaxt.media.webapp.ItemView = function (parent, config) {
         var w, h;
         var orientation = mediaItem.info.orientation;
         if (!orientation) orientation = 1;
-        //console.log(orientation);
+
         if (orientation<5){
-            w = width/mediaItem.info.width;
-            h = height/mediaItem.info.height;
+            w = displayWidth/mediaItem.info.width;
+            h = displayHeight/mediaItem.info.height;
         }
         else{
-            w = width/mediaItem.info.height;
-            h = height/mediaItem.info.width;
+            w = displayWidth/mediaItem.info.height;
+            h = displayHeight/mediaItem.info.width;
 
           //Hack for incorrect orientation (e.g. image was rotated
           //but the orientation flag wasn't updated)
             if (mediaItem.info.width<mediaItem.info.height){
-                w = width/mediaItem.info.width;
-                h = height/mediaItem.info.height;
+                w = displayWidth/mediaItem.info.width;
+                h = displayHeight/mediaItem.info.height;
             }
         }
         return [w,h];
