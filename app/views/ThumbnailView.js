@@ -360,14 +360,23 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
   //** createThumbnail
   //**************************************************************************
     var createThumbnail = function(item, div){
+
+      //Create thumbnail div
         var thumbnail = createElement("div", div, "thumbnail");
+        thumbnail.item = item;
+
+      //Populate div with an image or folder icon
         if (item.isFolder){
+
+          //Add folder icon to the thumbnail div
             createElement("div", thumbnail, "folder-icon");
             createElement("div", thumbnail).innerText = item.name;
         }
         else{
-            var path = "image?width=" + config.size + "&id=";
-            var url = path + item.id;
+
+          //Create temp image and set the thumbnail backgroundImage when the
+          //image loads. If the image fails to load, the thumbnail class name
+          //is updated instead.
             var img = createElement("img", thumbnail, {
                 display: "none"
             });
@@ -375,16 +384,25 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
             img.onload = function(){
                 this.thumbnail.style.backgroundImage = "url(\"" +  this.src + "\")";
                 this.parentNode.removeChild(this);
+
+              //Overlay video icon as needed
+                if (this.thumbnail.item.type=="video"){
+                    var div = createElement("div", this.thumbnail, "video-js");
+                    div = createElement("div", div, "vjs-big-play-button");
+                    createElement("span", div, "vjs-icon-placeholder");
+                }
+
             };
             img.onerror = function(){
                 this.thumbnail.className += " not-available";
                 this.parentNode.removeChild(this);
             };
-            img.src = url;
+
+            img.src = "image?width=" + config.size + "&id=" + item.id;
+
         }
 
-      //Watch for click events
-        thumbnail.item = item;
+      //Process click events
         thumbnail.onclick = function(){
             me.onClick(this.item);
         };
