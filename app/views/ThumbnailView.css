@@ -13,6 +13,7 @@
         height: 320px;
         display: inline-block;
         position: relative;
+        overflow: hidden;
         background-repeat:no-repeat;
         background-position: center center;
         cursor: pointer;
@@ -23,6 +24,16 @@
         transform: scale(110%);
     }
 
+    .thumbnail.selected > div {
+        border-color: rgba(82, 168, 236, 0.8);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(82, 168, 236, 0.6);
+        outline: 0 none;
+    }
+
+    .thumbnail.selected:hover{
+        transform: none;
+    }
+
 
   /**************************************************************************/
   /** Folder Icon
@@ -31,6 +42,7 @@
     .thumbnail .folder-icon {
         color: #45413a;
         text-shadow: -6px 3px 6px #000;
+        margin-top: 50px;
         transition: 0.4s;
     }
 

@@ -35,13 +35,9 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
     };
 
 
-
     var mask, tiles, noresults; //components
     var retriever; //instance of the Retriever class
     var isDirty = true; //used to determine whether to refresh the tiles on tiles.update()
-
-
-
 
 
 
@@ -141,12 +137,41 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
    */
     this.getItems = function(){
         var items = [];
-        tiles.forEachRow((row)=>{
-            items.push(...row.record);
+        tiles.forEachTile((tile)=>{
+            items.push(...tile.item);
         });
         return items;
     };
 
+
+  //**************************************************************************
+  //** select
+  //**************************************************************************
+    this.select = function(item){
+        tiles.forEachTile((thumbnail)=>{
+            if (thumbnail.item.id==item.id){
+                if (thumbnail.isSelected()){
+                    thumbnail.deselect();
+                }
+                else{
+                    thumbnail.select();
+                }
+                return true;
+            }
+        });
+    };
+
+
+  //**************************************************************************
+  //** selectAll
+  //**************************************************************************
+    this.selectAll = function(){
+        tiles.forEachTile((thumbnail)=>{
+            thumbnail.select();
+        });
+
+        //TODO: add logic to update selection as new items are added
+    };
 
 
   //**************************************************************************
@@ -241,6 +266,16 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
                 tiles.clear();
                 tiles.load();
                 isDirty = false;
+            }
+        };
+
+
+        tiles.forEachTile = function(callback){
+            var thumbnails = thumbnailContainer.childNodes;
+            for (var i=0; i<thumbnails.length; i++){ //skip phantom row!
+                var thumbnail = thumbnails[i];
+                var b = callback.apply(me, [thumbnail]);
+                if (b===true) return;
             }
         };
 
@@ -382,8 +417,24 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
             });
             img.thumbnail = thumbnail;
             img.onload = function(){
+
+              //Get image dimensions
+                var width = this.width;
+                var height = this.height;
+
+              //Update background image and delete image
                 this.thumbnail.style.backgroundImage = "url(\"" +  this.src + "\")";
                 this.parentNode.removeChild(this);
+
+
+              //Add transparent div for highlighting purposes
+                var div = createElement("div", this.thumbnail, {
+                    width: width+"px",
+                    height: height+"px",
+                    display: "inline-block"
+                });
+                div.className = "center middle";
+
 
               //Overlay video icon as needed
                 if (this.thumbnail.item.type=="video"){
@@ -401,6 +452,24 @@ javaxt.media.webapp.ThumbnailView = function(parent, config) {
             img.src = "image?width=" + config.size + "&id=" + item.id;
 
         }
+
+
+      //Add custom select/deselect methods
+        thumbnail.isSelected = function(){
+            for (var i=0; i<this.classList.length; i++){
+                if (this.classList[i]==="selected") return true;
+            }
+            return false;
+        };
+
+        thumbnail.select = function(){
+            this.classList.add("selected");
+        };
+
+        thumbnail.deselect = function(){
+            this.classList.remove("selected");
+        };
+
 
       //Process click events
         thumbnail.onclick = function(){

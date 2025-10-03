@@ -40,6 +40,13 @@ javaxt.media.webapp.Explorer = function(parent, config) {
     var navHistory = [];
     var navPosition = -1;
 
+  //The following variables are used to select features
+    var ignoreKeystrokes = false;
+    var cntrlIsPressed = false;
+    var shiftIsPressed = false;
+    var altIsPressed = false;
+    var depressedKeys = {};
+
 
   //**************************************************************************
   //** Constructor
@@ -68,6 +75,10 @@ javaxt.media.webapp.Explorer = function(parent, config) {
 
       //Watch for forward and back events via a 'popstate' listener
         enablePopstateListener();
+
+
+      //Watch for keystroke events
+        enableKeystrokeListener();
     };
 
 
@@ -104,6 +115,7 @@ javaxt.media.webapp.Explorer = function(parent, config) {
    */
     this.enable = function(){
         ignorePopstate = false;
+        ignoreKeystrokes = false;
 
 
         /* The back button in this component's toolbar calls history.back()
@@ -170,6 +182,7 @@ javaxt.media.webapp.Explorer = function(parent, config) {
    */
     this.disable = function(){
         ignorePopstate = true;
+        ignoreKeystrokes = true;
 
         //TODO: stop slideshow
 
@@ -300,6 +313,13 @@ javaxt.media.webapp.Explorer = function(parent, config) {
             style: javaxt.dhtml.style.default
         });
         thumbnailView.onClick = function(item){
+
+
+            if (cntrlIsPressed){
+                thumbnailView.select(item);
+                return;
+            }
+
 
             if (item.isFolder){
 
@@ -525,6 +545,65 @@ javaxt.media.webapp.Explorer = function(parent, config) {
                 title.update();
             }
         }
+
+    };
+
+
+  //**************************************************************************
+  //** enableKeystrokeListener
+  //**************************************************************************
+    var enableKeystrokeListener = function(){
+
+      //Watch for key events
+        document.addEventListener("keydown", function(e){
+            depressedKeys[e.keyCode+""] = e.keyCode;
+            var numDepressedKeys = Object.keys(depressedKeys).length;
+
+          //Shift key
+            if (e.keyCode===16){
+                shiftIsPressed = true;
+            }
+
+          //Ctrl key
+            if (e.keyCode===17){
+                cntrlIsPressed = true;
+            }
+
+          //Alt key
+            if (e.keyCode===18){
+                altIsPressed = true;
+            }
+
+        });
+        document.addEventListener("keyup", function(e){
+            delete depressedKeys[e.keyCode+""];
+            var numDepressedKeys = Object.keys(depressedKeys).length;
+
+
+          //Shift key
+            if (e.keyCode===16){
+                shiftIsPressed = false;
+            }
+
+          //Ctrl key
+            if (e.keyCode===17){
+                cntrlIsPressed = false;
+            }
+
+          //Alt key
+            if (e.keyCode===18){
+                altIsPressed = false;
+            }
+
+
+            if (cntrlIsPressed){
+
+              //Select all (ctrl+a)
+                if (e.keyCode===65){
+                    thumbnailView.selectAll();
+                }
+            }
+        });
 
     };
 

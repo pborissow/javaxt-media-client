@@ -29,7 +29,7 @@
         }
 
         .toolbar-button-label {
-            width: unset;
+            min-width: unset;
         }
 
 
